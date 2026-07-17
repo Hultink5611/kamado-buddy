@@ -86,6 +86,32 @@ export async function pushToHA(cfg: HAConfig, p: HAPayload): Promise<void> {
   }
 }
 
+/**
+ * One-off connectivity check for the Settings screen. Tells the user exactly
+ * why the dashboard stays empty (bad token, wrong URL, unreachable, …).
+ */
+export async function testHA(cfg: HAConfig): Promise<{ ok: boolean; detail: string }> {
+  if (!cfg.url || !cfg.token) return { ok: false, detail: 'Vul eerst een HA-URL én token in.' };
+  const base = cfg.url.replace(/\/+$/, '');
+  try {
+    const res = await fetch(`${base}/api/`, {
+      headers: { Authorization: `Bearer ${cfg.token}`, 'Content-Type': 'application/json' },
+    });
+    if (res.ok) {
+      return { ok: true, detail: "Verbonden! HA reageert. Start een cook en tik 'Vlees ligt erop' — de sensoren verschijnen dan in HA en op je dashboard." };
+    }
+    if (res.status === 401 || res.status === 403) {
+      return { ok: false, detail: `HTTP ${res.status} — token ongeldig of verlopen. Maak een nieuw long-lived token aan in HA (Profiel → Beveiliging).` };
+    }
+    return { ok: false, detail: `HTTP ${res.status} — HA gevonden maar antwoordt onverwacht. Controleer de URL (incl. http/https en poort 8123).` };
+  } catch (e) {
+    return {
+      ok: false,
+      detail: `Niet bereikbaar (${String(e)}). Klopt de URL, en kan je telefoon HA bereiken (zelfde wifi, of via Tailscale/Nabu Casa)?`,
+    };
+  }
+}
+
 /** Zet de cook op afgerond (kaart gaat uit). */
 export async function pushCookEnded(cfg: HAConfig): Promise<void> {
   if (!cfg.url || !cfg.token) return;

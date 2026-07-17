@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TextInput, Pressable, Alert, Share } from 'react-native';
 import { useApp } from '../state/AppContext';
 import { exportAll } from '../storage/db';
+import { testHA } from '../ha/haPush';
 import { theme } from '../theme';
 
 export default function SettingsScreen() {
@@ -17,6 +18,11 @@ export default function SettingsScreen() {
     updateSettings({ ha: { url: haUrl.trim() || undefined, token: haToken.trim() || undefined } }).then(() =>
       Alert.alert('Opgeslagen', 'Home Assistant-koppeling bijgewerkt.')
     );
+
+  const testHa = async () => {
+    const r = await testHA({ url: haUrl.trim() || undefined, token: haToken.trim() || undefined });
+    Alert.alert(r.ok ? '✅ Verbonden' : '❌ Niet gelukt', r.detail);
+  };
 
   const saveKeys = () =>
     updateSettings({
@@ -68,7 +74,8 @@ export default function SettingsScreen() {
         <Text style={styles.label}>Long-lived token</Text>
         <TextInput style={styles.input} value={haToken} onChangeText={setHaToken} placeholder="eyJ…" placeholderTextColor={theme.colors.textDim} autoCapitalize="none" autoCorrect={false} secureTextEntry />
         <Pressable style={styles.btn} onPress={saveHa}><Text style={styles.btnText}>HA-koppeling opslaan</Text></Pressable>
-        <Text style={styles.hint}>Token maak je in HA: Profiel → Beveiliging → Langlevende toegangstokens.</Text>
+        <Pressable style={[styles.btn, styles.btnAlt]} onPress={testHa}><Text style={styles.btnAltText}>Test verbinding</Text></Pressable>
+        <Text style={styles.hint}>Token maak je in HA: Profiel → Beveiliging → Langlevende toegangstokens. De sensoren verschijnen pas zodra je een cook start (en 'Vlees ligt erop' tikt).</Text>
       </Section>
 
       <Section title="Data">
@@ -98,5 +105,7 @@ const styles = StyleSheet.create({
   hint: { color: theme.colors.textDim, fontSize: theme.font.small, lineHeight: 19 },
   btn: { backgroundColor: theme.colors.accent, borderRadius: 10, paddingVertical: 12, alignItems: 'center', marginTop: 6 },
   btnText: { color: '#0d0f12', fontWeight: '700' },
+  btnAlt: { backgroundColor: theme.colors.cardAlt },
+  btnAltText: { color: theme.colors.text, fontWeight: '700' },
   version: { color: theme.colors.textDim, fontSize: theme.font.small, textAlign: 'center' },
 });
