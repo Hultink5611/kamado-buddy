@@ -59,7 +59,7 @@ export default function App() {
               contentStyle: { backgroundColor: theme.colors.bg },
             }}
           >
-            <Stack.Screen name="Home" component={HomeScreen} options={{ title: 'Kamado Buddy' }} />
+            <Stack.Screen name="Home" component={HomeScreen} options={{ title: 'Grillmeister' }} />
             <Stack.Screen name="NewCook" component={NewCookScreen} options={{ title: 'Nieuwe cook' }} />
             <Stack.Screen name="Cook" component={CookScreen} options={{ title: 'Live' }} />
             <Stack.Screen name="Logbook" component={LogbookScreen} options={{ title: 'Logboek' }} />

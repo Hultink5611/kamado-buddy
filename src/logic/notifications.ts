@@ -36,7 +36,7 @@ export async function setupNotifications(): Promise<boolean> {
   const { status } = await Notifications.requestPermissionsAsync();
   if (Platform.OS === 'android') {
     await Notifications.setNotificationChannelAsync('alarms', {
-      name: 'Kamado alarmen',
+      name: 'Grillmeister alarmen',
       importance: Notifications.AndroidImportance.MAX,
       sound: 'default',
       vibrationPattern: [0, 250, 250, 250],
@@ -74,7 +74,7 @@ export async function showCookStatus(text: string): Promise<void> {
   lastStatusText = text;
   await Notifications.scheduleNotificationAsync({
     identifier: STATUS_ID,
-    content: { title: '🔥 Kamado Buddy actief', body: text, sticky: true, data: { kind: 'status' } },
+    content: { title: '🔥 Grillmeister actief', body: text, sticky: true, data: { kind: 'status' } },
     trigger: null,
     // @ts-expect-error android-only channel field
     channelId: 'status',
