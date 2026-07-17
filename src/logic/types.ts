@@ -72,6 +72,11 @@ export interface ActiveCook {
   samples: TempSample[];
   manualAmbient: string;
   manualMeat: string;
+  /**
+   * When the meat actually went ON the grill (null while still tempering /
+   * bringing the BBQ up to temp). Total cook time + flip timer start from here.
+   */
+  grillOnAt: number | null;
   /** When the meat was last flipped (for the flip reminder + "late" counter). */
   lastFlipAt: number;
 }

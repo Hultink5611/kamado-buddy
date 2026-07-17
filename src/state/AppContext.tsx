@@ -156,6 +156,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       samples: [],
       manualAmbient: '',
       manualMeat: '',
+      grillOnAt: null, // set when the user taps "vlees ligt erop"
       lastFlipAt: now,
     });
     // "Meat can go on" reminder after the meat's temper time.
@@ -260,8 +261,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       // Flip reminder — per meat (meat.flipIntervalMin). Fires once per cycle:
       // when the meat is due, and again only after the user taps "gedraaid"
       // (which moves lastFlipAt). The "X min te laat" counter lives in the UI.
-      if (meat.flipIntervalMin != null && meat.flipIntervalMin > 0) {
-        const lastFlipAt = ac.lastFlipAt ?? ac.startedAt;
+      if (ac.grillOnAt != null && meat.flipIntervalMin != null && meat.flipIntervalMin > 0) {
+        const lastFlipAt = ac.lastFlipAt ?? ac.grillOnAt;
         const dueMs = meat.flipIntervalMin * 60_000;
         if (Date.now() - lastFlipAt >= dueMs && alarmRef.current.flipNotifiedAt !== lastFlipAt) {
           alarmRef.current.flipNotifiedAt = lastFlipAt;

@@ -7,6 +7,7 @@ import { useApp } from '../state/AppContext';
 import { getMeat, resolveTargetCore, estimateCookMinutes, predictMinutesRemaining } from '../logic/cook';
 import { getSteeringAdvice } from '../logic/steering';
 import { getLearnedForTarget } from '../logic/learning';
+import { cancelTemperReminder } from '../logic/notifications';
 import TempTile from '../components/TempTile';
 import LiveChart from '../components/LiveChart';
 import VentAdvice from '../components/VentAdvice';
@@ -45,6 +46,18 @@ export default function CookScreen({ navigation }: Props) {
 
   const remaining = predictMinutesRemaining(samples, targetCoreC);
 
+  const onGrill = ac?.grillOnAt != null;
+  const temperLeftMin =
+    meat && ac && !onGrill
+      ? Math.max(0, Math.ceil(((meat.temperMin ?? 0) * 60000 - (Date.now() - ac.startedAt)) / 60000))
+      : 0;
+
+  const putOnGrill = useCallback(() => {
+    const t = Date.now();
+    updateActiveCook({ grillOnAt: t, lastFlipAt: t });
+    void cancelTemperReminder();
+  }, [updateActiveCook]);
+
   const finish = useCallback(async () => {
     const id = await finishCook();
     if (id) navigation.replace('CookDetail', { cookId: id });
@@ -79,12 +92,26 @@ export default function CookScreen({ navigation }: Props) {
 
       <VentAdvice advice={advice} />
 
-      <Timers
-        startedAt={ac.startedAt}
-        flipIntervalMin={meat.flipIntervalMin}
-        lastFlipAt={ac.lastFlipAt ?? ac.startedAt}
-        onFlipReset={() => updateActiveCook({ lastFlipAt: Date.now() })}
-      />
+      {onGrill ? (
+        <Timers
+          startedAt={ac.grillOnAt as number}
+          flipIntervalMin={meat.flipIntervalMin}
+          lastFlipAt={ac.lastFlipAt ?? (ac.grillOnAt as number)}
+          onFlipReset={() => updateActiveCook({ lastFlipAt: Date.now() })}
+        />
+      ) : (
+        <View style={styles.grillPrompt}>
+          <Text style={styles.grillPromptH}>
+            {temperLeftMin > 0 ? `Nog ~${temperLeftMin} min temperen` : "Klaar — leg 'm erop! 🔥"}
+          </Text>
+          <Text style={styles.grillPromptSub}>
+            Breng de BBQ op temperatuur en laat het vlees op kamertemperatuur komen. Tik zodra het vlees écht op de BBQ ligt — dan starten de totaaltijd en de draai-timer.
+          </Text>
+          <Pressable style={styles.grillBtn} onPress={putOnGrill}>
+            <Text style={styles.grillBtnText}>Vlees ligt erop 🔥</Text>
+          </Pressable>
+        </View>
+      )}
 
       {ink.state !== 'connected' && (
         <View style={styles.manual}>
@@ -145,4 +172,9 @@ const styles = StyleSheet.create({
   chText: { color: theme.colors.text, fontSize: theme.font.small },
   finish: { backgroundColor: theme.colors.cardAlt, borderRadius: theme.radius, paddingVertical: 14, alignItems: 'center', paddingHorizontal: theme.space(6) },
   finishText: { color: theme.colors.text, fontSize: theme.font.body, fontWeight: '700' },
+  grillPrompt: { backgroundColor: theme.colors.card, borderRadius: theme.radius, padding: theme.space(4), gap: theme.space(3) },
+  grillPromptH: { color: theme.colors.text, fontSize: theme.font.h2, fontWeight: '700' },
+  grillPromptSub: { color: theme.colors.textDim, fontSize: theme.font.small, lineHeight: 20 },
+  grillBtn: { backgroundColor: theme.colors.accent, borderRadius: theme.radius, paddingVertical: 16, alignItems: 'center' },
+  grillBtnText: { color: '#0d0f12', fontSize: theme.font.h2, fontWeight: '700' },
 });
