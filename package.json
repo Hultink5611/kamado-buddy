@@ -6,7 +6,8 @@
     "start": "expo start --dev-client",
     "android": "expo run:android",
     "prebuild": "expo prebuild",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "ios": "expo run:ios"
   },
   "dependencies": {
     "@react-navigation/native": "^6.1.17",
@@ -15,7 +16,7 @@
     "expo": "~51.0.28",
     "expo-dev-client": "~4.0.25",
     "expo-file-system": "~17.0.1",
-    "expo-image-picker": "~15.0.7",
+    "expo-image-picker": "~15.1.0",
     "expo-keep-awake": "~13.0.2",
     "expo-notifications": "~0.28.16",
     "expo-sqlite": "~14.0.6",

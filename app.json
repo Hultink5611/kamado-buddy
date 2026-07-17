@@ -6,7 +6,10 @@
     "orientation": "portrait",
     "userInterfaceStyle": "automatic",
     "scheme": "kamadobuddy",
-    "newArchEnabled": false,
+    "splash": {
+      "backgroundColor": "#0d0f12",
+      "resizeMode": "contain"
+    },
     "runtimeVersion": {
       "policy": "appVersion"
     },
