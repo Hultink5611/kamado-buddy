@@ -4,13 +4,14 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../App';
 import { useApp } from '../state/AppContext';
+import { getMeat } from '../logic/cook';
 import { checkAndApplyUpdate } from '../logic/otaUpdate';
 import { theme } from '../theme';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Home'>;
 
 export default function HomeScreen({ navigation }: Props) {
-  const { ink } = useApp();
+  const { ink, activeCook } = useApp();
   const connected = ink.state === 'connected';
   const [refreshing, setRefreshing] = useState(false);
 
@@ -38,6 +39,15 @@ export default function HomeScreen({ navigation }: Props) {
           />
         }
       >
+        {activeCook && (
+          <Pressable style={styles.cookBanner} onPress={() => navigation.navigate('Cook')}>
+            <Text style={styles.cookBannerText}>
+              🔥 Cook actief{(() => { const m = getMeat(activeCook.input.meatId); return m ? ` — ${m.emoji} ${m.name}` : ''; })()}
+            </Text>
+            <Text style={styles.cookBannerSub}>Tik om terug te gaan naar het live-scherm</Text>
+          </Pressable>
+        )}
+
         <View style={[styles.status, { borderColor: connected ? theme.colors.target : theme.colors.line }]}>
           <View style={styles.statusRow}>
             <View
@@ -112,6 +122,9 @@ function Tile({ emoji, label, onPress }: { emoji: string; label: string; onPress
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: theme.colors.bg },
   content: { padding: theme.space(4), gap: theme.space(4) },
+  cookBanner: { backgroundColor: theme.colors.accent, borderRadius: theme.radius, padding: theme.space(4), gap: 2 },
+  cookBannerText: { color: '#0d0f12', fontSize: theme.font.body, fontWeight: '700' },
+  cookBannerSub: { color: '#0d0f12', fontSize: theme.font.small, opacity: 0.8 },
   status: { backgroundColor: theme.colors.card, borderRadius: theme.radius, borderWidth: 1, padding: theme.space(4), gap: theme.space(3) },
   statusRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   dot: { width: 12, height: 12, borderRadius: 6 },

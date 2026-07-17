@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { View, Text, StyleSheet, ScrollView, Pressable, TextInput, Alert } from 'react-native';
 import { useKeepAwake } from 'expo-keep-awake';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -6,11 +6,7 @@ import type { RootStackParamList } from '../App';
 import { useApp } from '../state/AppContext';
 import { getMeat, resolveTargetCore, estimateCookMinutes, predictMinutesRemaining } from '../logic/cook';
 import { getSteeringAdvice } from '../logic/steering';
-import { getLearnedForTarget, isStable, upsertLearned } from '../logic/learning';
-import { fireAlarm, showCookStatus, clearCookStatus } from '../logic/notifications';
-import { pushToHA, pushCookEnded } from '../ha/haPush';
-import { saveCook, saveLearned } from '../storage/db';
-import type { Cook, TempSample } from '../logic/types';
+import { getLearnedForTarget } from '../logic/learning';
 import TempTile from '../components/TempTile';
 import LiveChart from '../components/LiveChart';
 import VentAdvice from '../components/VentAdvice';
@@ -19,120 +15,51 @@ import { theme } from '../theme';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Cook'>;
 
-const SAMPLE_MS = 5000;
-
-export default function CookScreen({ route, navigation }: Props) {
+export default function CookScreen({ navigation }: Props) {
   useKeepAwake();
-  const { ink, settings, learned, reloadLearned } = useApp();
-  const { input } = route.params;
-  const meat = getMeat(input.meatId)!;
-  const targetCoreC = resolveTargetCore(meat, input.doneness);
-  const targetDomeC = meat.domeTempC;
+  const { ink, learned, activeCook, updateActiveCook, finishCook } = useApp();
+  const ac = activeCook;
 
-  const [startedAt] = useState(Date.now());
-  const [samples, setSamples] = useState<TempSample[]>([]);
-  const [manualAmbient, setManualAmbient] = useState('');
-  const [manualMeat, setManualMeat] = useState('');
-  const [ambientCh, setAmbientCh] = useState(settings.ambientChannel);
-  const [meatCh, setMeatCh] = useState(settings.meatChannel);
+  const meat = ac ? getMeat(ac.input.meatId) : undefined;
+  const targetCoreC = meat && ac ? resolveTargetCore(meat, ac.input.doneness) : null;
+  const targetDomeC = meat?.domeTempC ?? 0;
+  const samples = ac?.samples ?? [];
 
-  const firedCore = useRef(false);
-  const ambientOut = useRef(false);
-  const appliedVent = useRef({ bottom: 0.5, top: 0.5 });
-  const learnedFired = useRef(false);
+  const currentAmbient = ac
+    ? ink.channels[ac.ambientCh] ?? (ac.manualAmbient ? parseFloat(ac.manualAmbient) : null)
+    : null;
+  const currentMeat = ac
+    ? ink.channels[ac.meatCh] ?? (ac.manualMeat ? parseFloat(ac.manualMeat) : null)
+    : null;
 
-  const estimateMin = useMemo(() => estimateCookMinutes(meat, input), [meat, input]);
-
-  const currentAmbient = ink.channels[ambientCh] ?? (manualAmbient ? parseFloat(manualAmbient) : null);
-  const currentMeat = ink.channels[meatCh] ?? (manualMeat ? parseFloat(manualMeat) : null);
-
-  // Sampling loop
-  useEffect(() => {
-    const id = setInterval(() => {
-      setSamples((prev) => [
-        ...prev,
-        { t: Date.now(), ambientC: currentAmbient, meatC: currentMeat },
-      ].slice(-720)); // ~1h at 5s
-    }, SAMPLE_MS);
-    return () => clearInterval(id);
-  }, [currentAmbient, currentMeat]);
-
-  // Status notification
-  useEffect(() => {
-    void showCookStatus(
-      `${meat.emoji} ${meat.name} · BBQ ${currentAmbient ? Math.round(currentAmbient) : '–'}° · kern ${
-        currentMeat ? Math.round(currentMeat) : '–'
-      }°`
-    );
-  }, [currentAmbient, currentMeat, meat]);
-
-  useEffect(() => () => void clearCookStatus(), []);
+  const estimateMin = useMemo(
+    () => (meat && ac ? estimateCookMinutes(meat, ac.input) : 0),
+    [meat, ac]
+  );
 
   const learnedSetting = getLearnedForTarget(learned, targetDomeC);
   const advice = useMemo(
     () => getSteeringAdvice(targetDomeC, currentAmbient, samples, learnedSetting),
     [targetDomeC, currentAmbient, samples, learnedSetting]
   );
-  appliedVent.current = { bottom: advice.suggestedBottom, top: advice.suggestedTop };
-
-  // Push naar Home Assistant (thuishub-dashboard). ~elke 5s via [samples].
-  useEffect(() => {
-    void pushToHA(settings.ha, {
-      meatName: meat.name, ambientC: currentAmbient, meatC: currentMeat,
-      targetDomeC, targetCoreC, advice, active: true,
-    });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [samples]);
-
-  // Alarms
-  useEffect(() => {
-    if (!firedCore.current && targetCoreC != null && currentMeat != null && currentMeat >= targetCoreC) {
-      firedCore.current = true;
-      void fireAlarm('✅ Kerntemp bereikt!', `${meat.name} zit op ${Math.round(currentMeat)}°C. Haal 'm eraf en laat rusten (${meat.restMin} min).`);
-    }
-  }, [currentMeat, targetCoreC, meat]);
-
-  useEffect(() => {
-    if (currentAmbient == null) return;
-    const off = Math.abs(currentAmbient - targetDomeC) > settings.alarmMarginC;
-    if (off && !ambientOut.current) {
-      ambientOut.current = true;
-      void fireAlarm('🌡️ BBQ buiten bereik', `Omgeving ${Math.round(currentAmbient)}°C (doel ${targetDomeC}°C). ${advice.detail}`);
-    } else if (!off) {
-      ambientOut.current = false;
-    }
-  }, [currentAmbient, targetDomeC, settings.alarmMarginC, advice.detail]);
-
-  // Passive learning: when stable, remember the vent setting for this band.
-  useEffect(() => {
-    if (learnedFired.current || currentAmbient == null) return;
-    if (isStable(samples, targetDomeC)) {
-      learnedFired.current = true;
-      const next = upsertLearned(learned, targetDomeC, appliedVent.current.bottom, appliedVent.current.top, currentAmbient, Date.now());
-      void saveLearned(next).then(reloadLearned);
-    }
-  }, [samples, targetDomeC, currentAmbient, learned, reloadLearned]);
 
   const remaining = predictMinutesRemaining(samples, targetCoreC);
 
   const finish = useCallback(async () => {
-    const cook: Cook = {
-      id: `${startedAt}`,
-      startedAt,
-      endedAt: Date.now(),
-      input,
-      meatName: meat.name,
-      targetCoreC,
-      targetDomeC,
-      ambientChannel: ambientCh,
-      meatChannel: meatCh,
-      samples,
-    };
-    await saveCook(cook);
-    await clearCookStatus();
-    await pushCookEnded(settings.ha);
-    navigation.replace('CookDetail', { cookId: cook.id });
-  }, [startedAt, input, meat, targetCoreC, targetDomeC, ambientCh, meatCh, samples, navigation, settings.ha]);
+    const id = await finishCook();
+    if (id) navigation.replace('CookDetail', { cookId: id });
+  }, [finishCook, navigation]);
+
+  if (!ac || !meat) {
+    return (
+      <View style={styles.empty}>
+        <Text style={styles.emptyText}>Geen actieve cook.</Text>
+        <Pressable style={styles.finish} onPress={() => navigation.replace('Home')}>
+          <Text style={styles.finishText}>Naar start</Text>
+        </Pressable>
+      </View>
+    );
+  }
 
   return (
     <ScrollView contentContainerStyle={styles.content}>
@@ -152,14 +79,14 @@ export default function CookScreen({ route, navigation }: Props) {
 
       <VentAdvice advice={advice} />
 
-      <Timers startedAt={startedAt} flipIntervalMin={meat.flipIntervalMin} />
+      <Timers startedAt={ac.startedAt} flipIntervalMin={meat.flipIntervalMin} />
 
       {ink.state !== 'connected' && (
         <View style={styles.manual}>
           <Text style={styles.manualH}>Handmatig invoeren (geen meter verbonden)</Text>
           <View style={styles.row}>
-            <TextInput style={styles.mInput} keyboardType="numeric" placeholder="BBQ °C" placeholderTextColor={theme.colors.textDim} value={manualAmbient} onChangeText={setManualAmbient} />
-            <TextInput style={styles.mInput} keyboardType="numeric" placeholder="Vlees °C" placeholderTextColor={theme.colors.textDim} value={manualMeat} onChangeText={setManualMeat} />
+            <TextInput style={styles.mInput} keyboardType="numeric" placeholder="BBQ °C" placeholderTextColor={theme.colors.textDim} value={ac.manualAmbient} onChangeText={(v) => updateActiveCook({ manualAmbient: v })} />
+            <TextInput style={styles.mInput} keyboardType="numeric" placeholder="Vlees °C" placeholderTextColor={theme.colors.textDim} value={ac.manualMeat} onChangeText={(v) => updateActiveCook({ manualMeat: v })} />
           </View>
         </View>
       )}
@@ -167,8 +94,8 @@ export default function CookScreen({ route, navigation }: Props) {
       {ink.state === 'connected' && ink.channels.length > 1 && (
         <View style={styles.manual}>
           <Text style={styles.manualH}>Kanaal-toewijzing</Text>
-          <ChannelPicker label="Omgeving" channels={ink.channels} value={ambientCh} onChange={setAmbientCh} />
-          <ChannelPicker label="Vlees" channels={ink.channels} value={meatCh} onChange={setMeatCh} />
+          <ChannelPicker label="Omgeving" channels={ink.channels} value={ac.ambientCh} onChange={(n) => updateActiveCook({ ambientCh: n })} />
+          <ChannelPicker label="Vlees" channels={ink.channels} value={ac.meatCh} onChange={(n) => updateActiveCook({ meatCh: n })} />
         </View>
       )}
 
@@ -196,6 +123,8 @@ function ChannelPicker({ label, channels, value, onChange }: { label: string; ch
 
 const styles = StyleSheet.create({
   content: { padding: theme.space(4), gap: theme.space(4) },
+  empty: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: theme.space(4), padding: theme.space(4) },
+  emptyText: { color: theme.colors.textDim, fontSize: theme.font.body },
   header: { gap: 2 },
   title: { color: theme.colors.text, fontSize: theme.font.h1, fontWeight: '700' },
   sub: { color: theme.colors.textDim, fontSize: theme.font.body },
@@ -209,6 +138,6 @@ const styles = StyleSheet.create({
   chBtn: { backgroundColor: theme.colors.cardAlt, borderRadius: 10, paddingVertical: 6, paddingHorizontal: 10 },
   chBtnSel: { backgroundColor: theme.colors.accent },
   chText: { color: theme.colors.text, fontSize: theme.font.small },
-  finish: { backgroundColor: theme.colors.cardAlt, borderRadius: theme.radius, paddingVertical: 14, alignItems: 'center' },
+  finish: { backgroundColor: theme.colors.cardAlt, borderRadius: theme.radius, paddingVertical: 14, alignItems: 'center', paddingHorizontal: theme.space(6) },
   finishText: { color: theme.colors.text, fontSize: theme.font.body, fontWeight: '700' },
 });

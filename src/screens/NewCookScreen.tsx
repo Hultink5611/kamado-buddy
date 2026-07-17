@@ -11,7 +11,7 @@ import { theme } from '../theme';
 type Props = NativeStackScreenProps<RootStackParamList, 'NewCook'>;
 
 export default function NewCookScreen({ navigation }: Props) {
-  const { settings } = useApp();
+  const { settings, startCook } = useApp();
   const [meatId, setMeatId] = useState<string | null>(null);
   const [doneness, setDoneness] = useState<string | undefined>();
   const [frozen, setFrozen] = useState(false);
@@ -47,16 +47,15 @@ export default function NewCookScreen({ navigation }: Props) {
 
   const start = () => {
     if (!meatId) return;
-    navigation.replace('Cook', {
-      input: {
-        meatId,
-        doneness,
-        frozen,
-        weightKg: weight ? parseFloat(weight.replace(',', '.')) : undefined,
-        thicknessCm: thickness ? parseFloat(thickness.replace(',', '.')) : undefined,
-        photoUri,
-      },
+    startCook({
+      meatId,
+      doneness,
+      frozen,
+      weightKg: weight ? parseFloat(weight.replace(',', '.')) : undefined,
+      thicknessCm: thickness ? parseFloat(thickness.replace(',', '.')) : undefined,
+      photoUri,
     });
+    navigation.replace('Cook');
   };
 
   return (
