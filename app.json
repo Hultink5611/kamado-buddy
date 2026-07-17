@@ -7,6 +7,14 @@
     "userInterfaceStyle": "automatic",
     "scheme": "kamadobuddy",
     "newArchEnabled": false,
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/1dc02381-0713-42a5-bfd4-ca96667b966f",
+      "fallbackToCacheTimeout": 0,
+      "checkAutomatically": "ON_LOAD"
+    },
     "android": {
       "package": "org.hultink.kamadobuddy",
       "permissions": [
