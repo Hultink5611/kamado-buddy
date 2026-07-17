@@ -8,6 +8,7 @@ import { getMeat, resolveTargetCore, estimateCookMinutes, predictMinutesRemainin
 import { getSteeringAdvice } from '../logic/steering';
 import { getLearnedForTarget, isStable, upsertLearned } from '../logic/learning';
 import { fireAlarm, showCookStatus, clearCookStatus } from '../logic/notifications';
+import { pushToHA, pushCookEnded } from '../ha/haPush';
 import { saveCook, saveLearned } from '../storage/db';
 import type { Cook, TempSample } from '../logic/types';
 import TempTile from '../components/TempTile';
@@ -74,6 +75,15 @@ export default function CookScreen({ route, navigation }: Props) {
   );
   appliedVent.current = { bottom: advice.suggestedBottom, top: advice.suggestedTop };
 
+  // Push naar Home Assistant (thuishub-dashboard). ~elke 5s via [samples].
+  useEffect(() => {
+    void pushToHA(settings.ha, {
+      meatName: meat.name, ambientC: currentAmbient, meatC: currentMeat,
+      targetDomeC, targetCoreC, advice, active: true,
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [samples]);
+
   // Alarms
   useEffect(() => {
     if (!firedCore.current && targetCoreC != null && currentMeat != null && currentMeat >= targetCoreC) {
@@ -120,8 +130,9 @@ export default function CookScreen({ route, navigation }: Props) {
     };
     await saveCook(cook);
     await clearCookStatus();
+    await pushCookEnded(settings.ha);
     navigation.replace('CookDetail', { cookId: cook.id });
-  }, [startedAt, input, meat, targetCoreC, targetDomeC, ambientCh, meatCh, samples, navigation]);
+  }, [startedAt, input, meat, targetCoreC, targetDomeC, ambientCh, meatCh, samples, navigation, settings.ha]);
 
   return (
     <ScrollView contentContainerStyle={styles.content}>
