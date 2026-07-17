@@ -149,7 +149,7 @@ export default function NewCookScreen({ navigation }: Props) {
           <TextInput
             style={styles.input}
             keyboardType="numeric"
-            placeholder={useWeight ? 'bijv. 1.5' : 'bijv. 3'}
+            placeholder={useWeight ? `bijv. ${meat.typicalWeightKg ?? 1.5}` : 'bijv. 3'}
             placeholderTextColor={theme.colors.textDim}
             value={useWeight ? weight : thickness}
             onChangeText={useWeight ? setWeight : setThickness}

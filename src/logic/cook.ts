@@ -102,7 +102,7 @@ export function estimateCookMinutes(meat: Meat, input: CookInput): number {
     const cm = input.thicknessCm ?? 3;
     mins = e.baseMin + (e.minPerCm ?? 0) * cm;
   } else {
-    const kg = input.weightKg ?? 1;
+    const kg = input.weightKg ?? meat.typicalWeightKg ?? 1;
     mins = e.baseMin + (e.minPerKg ?? 0) * kg;
   }
   if (input.frozen) mins *= meat.frozenFactor;

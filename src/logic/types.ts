@@ -12,6 +12,8 @@ export interface Meat {
   doneness?: Record<string, number>;
   flipIntervalMin: number | null;
   estimate: { type: 'thickness' | 'weight'; baseMin: number; minPerCm?: number; minPerKg?: number };
+  /** Typical weight (kg) used for the time estimate when none is entered. */
+  typicalWeightKg?: number;
   frozenFactor: number;
   restMin: number;
   /** Minutes to let the meat come to room temperature before it goes on. */
