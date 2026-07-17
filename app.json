@@ -1,0 +1,32 @@
+{
+  "expo": {
+    "name": "Kamado Buddy",
+    "slug": "kamado-buddy",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "automatic",
+    "scheme": "kamadobuddy",
+    "newArchEnabled": false,
+    "android": {
+      "package": "org.hultink.kamadobuddy",
+      "permissions": [
+        "android.permission.BLUETOOTH_SCAN",
+        "android.permission.BLUETOOTH_CONNECT",
+        "android.permission.ACCESS_FINE_LOCATION",
+        "android.permission.FOREGROUND_SERVICE",
+        "android.permission.POST_NOTIFICATIONS"
+      ]
+    },
+    "plugins": [
+      [
+        "react-native-ble-plx",
+        {
+          "isBackgroundEnabled": true,
+          "modes": ["peripheral", "central"],
+          "bluetoothAlwaysPermission": "Kamado Buddy gebruikt Bluetooth om je Inkbird-thermometer uit te lezen."
+        }
+      ],
+      "expo-notifications"
+    ]
+  }
+}
