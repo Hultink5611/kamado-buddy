@@ -6,6 +6,7 @@ import { theme } from '../theme';
 
 export default function SettingsScreen() {
   const { settings, updateSettings } = useApp();
+  const [openai, setOpenai] = useState(settings.keys.openaiKey ?? '');
   const [gemini, setGemini] = useState(settings.keys.geminiKey ?? '');
   const [groq, setGroq] = useState(settings.keys.groqKey ?? '');
   const [margin, setMargin] = useState(String(settings.alarmMarginC));
@@ -18,9 +19,13 @@ export default function SettingsScreen() {
     );
 
   const saveKeys = () =>
-    updateSettings({ keys: { geminiKey: gemini.trim() || undefined, groqKey: groq.trim() || undefined } }).then(() =>
-      Alert.alert('Opgeslagen', 'AI-sleutels bijgewerkt.')
-    );
+    updateSettings({
+      keys: {
+        openaiKey: openai.trim() || undefined,
+        geminiKey: gemini.trim() || undefined,
+        groqKey: groq.trim() || undefined,
+      },
+    }).then(() => Alert.alert('Opgeslagen', 'AI-sleutels bijgewerkt.'));
 
   const exportData = async () => {
     const json = await exportAll();
@@ -31,14 +36,16 @@ export default function SettingsScreen() {
     <ScrollView contentContainerStyle={styles.content}>
       <Section title="AI (optioneel)">
         <Text style={styles.hint}>
-          Gemini Flash (gratis) herkent foto’s en stuurt bij. Groq (gratis, tekst) is de fallback als Gemini op is. De live temp-logica werkt altijd zonder AI.
+          Meerdere sleutels? Dan wordt de eerste die werkt gebruikt: OpenAI (GPT) → Gemini → Groq. Zo valt een Gemini-limiet (429) automatisch door naar GPT. De live temp-logica werkt altijd zonder AI.
         </Text>
+        <Text style={styles.label}>OpenAI (GPT) API-sleutel</Text>
+        <TextInput style={styles.input} value={openai} onChangeText={setOpenai} placeholder="sk-…" placeholderTextColor={theme.colors.textDim} autoCapitalize="none" autoCorrect={false} secureTextEntry />
         <Text style={styles.label}>Gemini API-sleutel</Text>
-        <TextInput style={styles.input} value={gemini} onChangeText={setGemini} placeholder="AIza…" placeholderTextColor={theme.colors.textDim} autoCapitalize="none" secureTextEntry />
+        <TextInput style={styles.input} value={gemini} onChangeText={setGemini} placeholder="AIza…" placeholderTextColor={theme.colors.textDim} autoCapitalize="none" autoCorrect={false} secureTextEntry />
         <Text style={styles.label}>Groq API-sleutel</Text>
-        <TextInput style={styles.input} value={groq} onChangeText={setGroq} placeholder="gsk_…" placeholderTextColor={theme.colors.textDim} autoCapitalize="none" secureTextEntry />
+        <TextInput style={styles.input} value={groq} onChangeText={setGroq} placeholder="gsk_…" placeholderTextColor={theme.colors.textDim} autoCapitalize="none" autoCorrect={false} secureTextEntry />
         <Pressable style={styles.btn} onPress={saveKeys}><Text style={styles.btnText}>Sleutels opslaan</Text></Pressable>
-        <Text style={styles.hint}>Gratis sleutels: aistudio.google.com/apikey (Gemini) · console.groq.com/keys (Groq)</Text>
+        <Text style={styles.hint}>Sleutels: platform.openai.com/api-keys (OpenAI) · aistudio.google.com/apikey (Gemini) · console.groq.com/keys (Groq)</Text>
       </Section>
 
       <Section title="Alarmen">

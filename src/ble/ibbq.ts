@@ -7,7 +7,7 @@
  *   2. Write the login/credential bytes to characteristic 0xFFF2.
  *   3. Enable notifications on the realtime characteristic 0xFFF4.
  *   4. Write the "enable realtime data" command to 0xFFF5.
- *   5. Decode 0xFFF4 notifications: 2 bytes little-endian per probe, / 100 = °C.
+ *   5. Decode 0xFFF4 notifications: 2 bytes little-endian per probe, / 10 = °C.
  *
  * Only ONE BLE central can be connected at a time, so the official Inkbird
  * app must be closed/disconnected while Kamado Buddy is connected.
@@ -48,7 +48,7 @@ export const SET_UNIT_CELSIUS_BYTES = [0x02, 0x00, 0x00, 0x00, 0x00, 0x00];
 
 /**
  * A disconnected probe reports a sentinel. On iBBQ it is 0xFFF6 (raw),
- * which after /100 becomes ~655.3. Anything absurdly high = no probe.
+ * which after /10 becomes ~6552. Anything absurdly high = no probe.
  */
 export const PROBE_DISCONNECTED_RAW = 0xfff6;
 const IMPLAUSIBLE_C = 600;
@@ -90,7 +90,9 @@ export function decodeRealtime(bytes: number[]): (number | null)[] {
       probes.push(null);
       continue;
     }
-    const c = raw / 100;
+    // iBBQ transmits temperature in 0.1 °C units (little-endian uint16),
+    // so the raw value is divided by 10 — e.g. raw 270 = 27.0 °C.
+    const c = raw / 10;
     probes.push(c > IMPLAUSIBLE_C ? null : Math.round(c * 10) / 10);
   }
   return probes;
