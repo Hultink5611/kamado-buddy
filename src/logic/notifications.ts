@@ -3,6 +3,9 @@ import { Platform } from 'react-native';
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
+    // SDK 51 (expo-notifications ~0.28) requires shouldShowAlert; the
+    // shouldShowBanner/shouldShowList fields are forward-compat for SDK 52+.
+    shouldShowAlert: true,
     shouldShowBanner: true,
     shouldShowList: true,
     shouldPlaySound: true,
