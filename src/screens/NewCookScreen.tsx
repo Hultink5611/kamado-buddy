@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, Pressable, ScrollView, TextInput, Switch, Image
 import * as ImagePicker from 'expo-image-picker';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../App';
-import { MEATS, getMeat } from '../logic/cook';
+import { getMeat } from '../logic/cook';
 import { identifyMeat } from '../ai/steerAI';
 import { useApp } from '../state/AppContext';
 import { theme } from '../theme';
@@ -11,7 +11,7 @@ import { theme } from '../theme';
 type Props = NativeStackScreenProps<RootStackParamList, 'NewCook'>;
 
 export default function NewCookScreen({ navigation }: Props) {
-  const { settings, startCook } = useApp();
+  const { settings, startCook, meats, saveMeat } = useApp();
   const [meatId, setMeatId] = useState<string | null>(null);
   const [doneness, setDoneness] = useState<string | undefined>();
   const [frozen, setFrozen] = useState(false);
@@ -28,16 +28,27 @@ export default function NewCookScreen({ navigation }: Props) {
     if (res.canceled || !res.assets[0]) return;
     const asset = res.assets[0];
     setPhotoUri(asset.uri);
-    if (!settings.keys.geminiKey) {
-      Alert.alert('Geen AI-sleutel', 'Stel een Gemini-sleutel in bij Instellingen om foto’s te laten herkennen. De foto is bewaard in je logboek.');
+    if (!settings.keys.openaiKey && !settings.keys.geminiKey) {
+      Alert.alert('Geen AI-sleutel', 'Stel een OpenAI- of Gemini-sleutel in bij Instellingen om foto’s te laten herkennen. De foto is bewaard in je logboek.');
       return;
     }
     if (!asset.base64) return;
     setAiBusy(true);
     try {
-      const guess = await identifyMeat(settings.keys, asset.base64);
-      if (guess.meatId) setMeatId(guess.meatId);
-      Alert.alert('AI-suggestie', `${guess.name}\n\n${guess.notes}`);
+      const guess = await identifyMeat(settings.keys, meats, asset.base64);
+      if (guess.newMeat) {
+        // AI ontdekte een stuk dat nog niet in de lijst staat → automatisch toevoegen.
+        await saveMeat(guess.newMeat);
+        setMeatId(guess.newMeat.id);
+        setDoneness(undefined);
+        Alert.alert('Nieuw stuk ontdekt! 🎉', `Ik heb "${guess.newMeat.name}" niet in je lijst gevonden en het automatisch toegevoegd.\n\n${guess.notes}`);
+      } else if (guess.meatId) {
+        setMeatId(guess.meatId);
+        setDoneness(undefined);
+        Alert.alert('AI-suggestie', `${guess.name}\n\n${guess.notes}`);
+      } else {
+        Alert.alert('AI-suggestie', `${guess.name}\n\n${guess.notes}`);
+      }
     } catch (e) {
       Alert.alert('AI mislukt', String(e));
     } finally {
@@ -69,9 +80,14 @@ export default function NewCookScreen({ navigation }: Props) {
         {aiBusy && <ActivityIndicator style={StyleSheet.absoluteFill} color={theme.colors.accent} />}
       </Pressable>
 
-      <Text style={styles.h}>Kies je vlees</Text>
+      <View style={styles.hRow}>
+        <Text style={styles.h}>Kies je vlees</Text>
+        <Pressable onPress={() => navigation.navigate('MeatEdit')}>
+          <Text style={styles.manageLink}>Beheren</Text>
+        </Pressable>
+      </View>
       <View style={styles.meatGrid}>
-        {MEATS.map((m) => (
+        {meats.map((m) => (
           <Pressable
             key={m.id}
             style={[styles.meatChip, meatId === m.id && styles.meatChipSel]}
@@ -138,7 +154,9 @@ const styles = StyleSheet.create({
   photo: { height: 120, backgroundColor: theme.colors.card, borderRadius: theme.radius, alignItems: 'center', justifyContent: 'center', overflow: 'hidden' },
   photoImg: { width: '100%', height: '100%' },
   photoText: { color: theme.colors.textDim },
+  hRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   h: { color: theme.colors.text, fontSize: theme.font.h2, fontWeight: '700' },
+  manageLink: { color: theme.colors.accent, fontSize: theme.font.small, fontWeight: '600' },
   meatGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: theme.space(2) },
   meatChip: { backgroundColor: theme.colors.card, borderRadius: 12, paddingVertical: 8, paddingHorizontal: 12, flexDirection: 'row', alignItems: 'center', gap: 6 },
   meatChipSel: { backgroundColor: theme.colors.accent },

@@ -14,6 +14,7 @@ import LogbookScreen from './screens/LogbookScreen';
 import CookDetailScreen from './screens/CookDetailScreen';
 import CalibrationScreen from './screens/CalibrationScreen';
 import SettingsScreen from './screens/SettingsScreen';
+import MeatEditScreen from './screens/MeatEditScreen';
 
 export type RootStackParamList = {
   Home: undefined;
@@ -23,6 +24,7 @@ export type RootStackParamList = {
   CookDetail: { cookId: string };
   Calibration: undefined;
   Settings: undefined;
+  MeatEdit: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -64,6 +66,7 @@ export default function App() {
             <Stack.Screen name="CookDetail" component={CookDetailScreen} options={{ title: 'Cook' }} />
             <Stack.Screen name="Calibration" component={CalibrationScreen} options={{ title: 'Kalibratie' }} />
             <Stack.Screen name="Settings" component={SettingsScreen} options={{ title: 'Instellingen' }} />
+            <Stack.Screen name="MeatEdit" component={MeatEditScreen} options={{ title: 'Vlees beheren' }} />
           </Stack.Navigator>
         </NavigationContainer>
       </AppProvider>

@@ -1,14 +1,23 @@
 import React, { createContext, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { useInkbird } from '../ble/useInkbird';
 import { getSetting, setSetting, getLearned, saveCook, saveLearned } from '../storage/db';
-import { getMeat, resolveTargetCore } from '../logic/cook';
+import {
+  getMeat,
+  resolveTargetCore,
+  computeMeats,
+  setMeatCustomization,
+  upsertMeat,
+  removeMeat,
+  EMPTY_MEAT_CUSTOMIZATION,
+  type MeatCustomization,
+} from '../logic/cook';
 import { getSteeringAdvice } from '../logic/steering';
 import { getLearnedForTarget, isStable, upsertLearned } from '../logic/learning';
 import { fireAlarm, showCookStatus, clearCookStatus } from '../logic/notifications';
 import { pushToHA, pushCookEnded } from '../ha/haPush';
 import type { AIKeys } from '../ai/steerAI';
 import type { HAConfig } from '../ha/haPush';
-import type { ActiveCook, Cook, CookInput, LearnedSetting, TempSample } from '../logic/types';
+import type { ActiveCook, Cook, CookInput, LearnedSetting, Meat, TempSample } from '../logic/types';
 
 interface Settings {
   ambientChannel: number;
@@ -29,6 +38,10 @@ interface AppValue {
   startCook: (input: CookInput) => void;
   updateActiveCook: (patch: Partial<ActiveCook>) => void;
   finishCook: () => Promise<string | null>;
+  /** Effective meat list (built-in + user customisation). */
+  meats: Meat[];
+  saveMeat: (meat: Meat) => Promise<void>;
+  deleteMeat: (id: string) => Promise<void>;
 }
 
 const DEFAULTS: Settings = {
@@ -48,6 +61,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [settings, setSettings] = useState<Settings>(DEFAULTS);
   const [learned, setLearned] = useState<LearnedSetting[]>([]);
   const [activeCook, setActiveCook] = useState<ActiveCook | null>(null);
+  const [meats, setMeats] = useState<Meat[]>(() => computeMeats(EMPTY_MEAT_CUSTOMIZATION));
+  const meatCustomRef = useRef<MeatCustomization>(EMPTY_MEAT_CUSTOMIZATION);
   const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
@@ -55,6 +70,18 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       const raw = await getSetting('settings');
       if (raw) setSettings({ ...DEFAULTS, ...JSON.parse(raw) });
       setLearned(await getLearned());
+      // Restore custom / edited / deleted meats.
+      const meatRaw = await getSetting('meatCustom');
+      if (meatRaw) {
+        try {
+          const c = JSON.parse(meatRaw) as MeatCustomization;
+          meatCustomRef.current = c;
+          setMeatCustomization(c);
+          setMeats(computeMeats(c));
+        } catch {
+          /* corrupt — keep built-in list */
+        }
+      }
       // Restore a cook that was running before the app was closed / reloaded.
       const cookRaw = await getSetting('activeCook');
       if (cookRaw) {
@@ -80,6 +107,16 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   };
 
   const reloadLearned = async () => setLearned(await getLearned());
+
+  // ---- Meat customisation (add / edit / delete) --------------------------
+  const persistMeatCustom = async (c: MeatCustomization) => {
+    meatCustomRef.current = c;
+    setMeatCustomization(c); // keep the module registry (getMeat) in sync
+    setMeats(computeMeats(c));
+    await setSetting('meatCustom', JSON.stringify(c));
+  };
+  const saveMeat = (meat: Meat) => persistMeatCustom(upsertMeat(meatCustomRef.current, meat));
+  const deleteMeat = (id: string) => persistMeatCustom(removeMeat(meatCustomRef.current, id));
 
   // ---- Active-cook engine -------------------------------------------------
   // Everything the live screen used to do runs HERE instead, so it keeps
@@ -254,9 +291,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       startCook,
       updateActiveCook,
       finishCook,
+      meats,
+      saveMeat,
+      deleteMeat,
     }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [ink, settings, learned, activeCook]
+    [ink, settings, learned, activeCook, meats]
   );
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }
