@@ -2,6 +2,7 @@ import React, { createContext, useContext, useEffect, useMemo, useState } from '
 import { useInkbird } from '../ble/useInkbird';
 import { getSetting, setSetting, getLearned } from '../storage/db';
 import type { AIKeys } from '../ai/steerAI';
+import type { HAConfig } from '../ha/haPush';
 import type { LearnedSetting } from '../logic/types';
 
 interface Settings {
@@ -9,6 +10,7 @@ interface Settings {
   meatChannel: number;
   alarmMarginC: number;
   keys: AIKeys;
+  ha: HAConfig;
 }
 
 interface AppValue {
@@ -24,6 +26,7 @@ const DEFAULTS: Settings = {
   meatChannel: 1,
   alarmMarginC: 15,
   keys: {},
+  ha: {},
 };
 
 const Ctx = createContext<AppValue | null>(null);
@@ -42,7 +45,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const updateSettings = async (patch: Partial<Settings>) => {
-    const next = { ...settings, ...patch, keys: { ...settings.keys, ...(patch.keys ?? {}) } };
+    const next = {
+      ...settings,
+      ...patch,
+      keys: { ...settings.keys, ...(patch.keys ?? {}) },
+      ha: { ...settings.ha, ...(patch.ha ?? {}) },
+    };
     setSettings(next);
     await setSetting('settings', JSON.stringify(next));
   };

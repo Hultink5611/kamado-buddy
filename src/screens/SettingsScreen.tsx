@@ -9,6 +9,13 @@ export default function SettingsScreen() {
   const [gemini, setGemini] = useState(settings.keys.geminiKey ?? '');
   const [groq, setGroq] = useState(settings.keys.groqKey ?? '');
   const [margin, setMargin] = useState(String(settings.alarmMarginC));
+  const [haUrl, setHaUrl] = useState(settings.ha.url ?? '');
+  const [haToken, setHaToken] = useState(settings.ha.token ?? '');
+
+  const saveHa = () =>
+    updateSettings({ ha: { url: haUrl.trim() || undefined, token: haToken.trim() || undefined } }).then(() =>
+      Alert.alert('Opgeslagen', 'Home Assistant-koppeling bijgewerkt.')
+    );
 
   const saveKeys = () =>
     updateSettings({ keys: { geminiKey: gemini.trim() || undefined, groqKey: groq.trim() || undefined } }).then(() =>
@@ -43,6 +50,18 @@ export default function SettingsScreen() {
           keyboardType="numeric"
           onBlur={() => updateSettings({ alarmMarginC: parseInt(margin, 10) || 15 })}
         />
+      </Section>
+
+      <Section title="Thuishub (Home Assistant)">
+        <Text style={styles.hint}>
+          Stuurt live temps + klepadvies naar HA, zodat je BBQ-kaart op de Tab S11 verschijnt. Blijft lokaal op je telefoon, niet in git.
+        </Text>
+        <Text style={styles.label}>HA-URL</Text>
+        <TextInput style={styles.input} value={haUrl} onChangeText={setHaUrl} placeholder="http://192.168.178.10:8123" placeholderTextColor={theme.colors.textDim} autoCapitalize="none" autoCorrect={false} />
+        <Text style={styles.label}>Long-lived token</Text>
+        <TextInput style={styles.input} value={haToken} onChangeText={setHaToken} placeholder="eyJ…" placeholderTextColor={theme.colors.textDim} autoCapitalize="none" autoCorrect={false} secureTextEntry />
+        <Pressable style={styles.btn} onPress={saveHa}><Text style={styles.btnText}>HA-koppeling opslaan</Text></Pressable>
+        <Text style={styles.hint}>Token maak je in HA: Profiel → Beveiliging → Langlevende toegangstokens.</Text>
       </Section>
 
       <Section title="Data">
