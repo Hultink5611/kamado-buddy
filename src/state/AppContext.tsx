@@ -13,7 +13,13 @@ import {
 } from '../logic/cook';
 import { getSteeringAdvice } from '../logic/steering';
 import { getLearnedForTarget, isStable, upsertLearned } from '../logic/learning';
-import { fireAlarm, showCookStatus, clearCookStatus } from '../logic/notifications';
+import {
+  fireAlarm,
+  showCookStatus,
+  clearCookStatus,
+  scheduleTemperReminder,
+  cancelTemperReminder,
+} from '../logic/notifications';
 import { pushToHA, pushCookEnded } from '../ha/haPush';
 import type { AIKeys } from '../ai/steerAI';
 import type { HAConfig } from '../ha/haPush';
@@ -129,25 +135,32 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     firedCore: false,
     ambientOut: false,
     learnedFired: false,
+    flipNotifiedAt: 0, // the lastFlipAt value we already sent a "flip" alarm for
     appliedVent: { bottom: 0.5, top: 0.5 },
   });
 
   const startCook = (input: CookInput) => {
+    const now = Date.now();
     alarmRef.current = {
       firedCore: false,
       ambientOut: false,
       learnedFired: false,
+      flipNotifiedAt: 0,
       appliedVent: { bottom: 0.5, top: 0.5 },
     };
     setActiveCook({
       input,
-      startedAt: Date.now(),
+      startedAt: now,
       ambientCh: settings.ambientChannel,
       meatCh: settings.meatChannel,
       samples: [],
       manualAmbient: '',
       manualMeat: '',
+      lastFlipAt: now,
     });
+    // "Meat can go on" reminder after the meat's temper time.
+    const meat = getMeat(input.meatId);
+    void scheduleTemperReminder(meat?.name ?? 'Je vlees', meat?.temperMin ?? 0);
   };
 
   const updateActiveCook = (patch: Partial<ActiveCook>) =>
@@ -172,6 +185,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     await saveCook(cook);
     setActiveCook(null);
     await clearCookStatus();
+    await cancelTemperReminder();
     await pushCookEnded(stateRef.current.settings.ha);
     return cook.id;
   };
@@ -241,6 +255,18 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           '✅ Kerntemp bereikt!',
           `${meat.name} zit op ${Math.round(currentMeat)}°C. Haal 'm eraf en laat rusten (${meat.restMin} min).`
         );
+      }
+
+      // Flip reminder — per meat (meat.flipIntervalMin). Fires once per cycle:
+      // when the meat is due, and again only after the user taps "gedraaid"
+      // (which moves lastFlipAt). The "X min te laat" counter lives in the UI.
+      if (meat.flipIntervalMin != null && meat.flipIntervalMin > 0) {
+        const lastFlipAt = ac.lastFlipAt ?? ac.startedAt;
+        const dueMs = meat.flipIntervalMin * 60_000;
+        if (Date.now() - lastFlipAt >= dueMs && alarmRef.current.flipNotifiedAt !== lastFlipAt) {
+          alarmRef.current.flipNotifiedAt = lastFlipAt;
+          void fireAlarm('🔄 Draaien!', `Tijd om ${meat.name} te draaien.`);
+        }
       }
 
       // BBQ out-of-range alarm.

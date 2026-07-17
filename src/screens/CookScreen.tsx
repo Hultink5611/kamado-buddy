@@ -79,7 +79,12 @@ export default function CookScreen({ navigation }: Props) {
 
       <VentAdvice advice={advice} />
 
-      <Timers startedAt={ac.startedAt} flipIntervalMin={meat.flipIntervalMin} />
+      <Timers
+        startedAt={ac.startedAt}
+        flipIntervalMin={meat.flipIntervalMin}
+        lastFlipAt={ac.lastFlipAt ?? ac.startedAt}
+        onFlipReset={() => updateActiveCook({ lastFlipAt: Date.now() })}
+      />
 
       {ink.state !== 'connected' && (
         <View style={styles.manual}>

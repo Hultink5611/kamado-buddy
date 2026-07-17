@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { View, Text, StyleSheet, Pressable, TextInput } from 'react-native';
 import { theme } from '../theme';
 import { fireAlarm } from '../logic/notifications';
@@ -6,7 +6,10 @@ import { fireAlarm } from '../logic/notifications';
 interface Props {
   startedAt: number;
   flipIntervalMin: number | null;
-  onFlip?: () => void;
+  /** When the meat was last flipped (drives the countdown + "late" counter). */
+  lastFlipAt: number;
+  /** Called when the user taps the flip block ("I just flipped"). */
+  onFlipReset: () => void;
 }
 
 function fmt(sec: number): string {
@@ -23,32 +26,26 @@ interface CustomTimer {
   fired: boolean;
 }
 
-export default function Timers({ startedAt, flipIntervalMin, onFlip }: Props) {
+export default function Timers({ startedAt, flipIntervalMin, lastFlipAt, onFlipReset }: Props) {
   const [now, setNow] = useState(Date.now());
   const [customs, setCustoms] = useState<CustomTimer[]>([]);
   const [newMin, setNewMin] = useState('2');
   const [newLabel, setNewLabel] = useState('');
-  const lastFlipRef = useRef<number>(startedAt);
 
   useEffect(() => {
     const id = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(id);
   }, []);
 
-  // Flip timer
+  // Flip timer — counts down to the next flip, then counts UP ("te laat") until
+  // the user taps to confirm they flipped. The notification itself is fired by
+  // the cook engine (so it works even off this screen).
   const flipSecLeft = useMemo(() => {
     if (!flipIntervalMin) return null;
-    const elapsed = (now - lastFlipRef.current) / 1000;
+    const elapsed = (now - lastFlipAt) / 1000;
     return flipIntervalMin * 60 - elapsed;
-  }, [now, flipIntervalMin]);
-
-  useEffect(() => {
-    if (flipSecLeft != null && flipSecLeft <= 0) {
-      lastFlipRef.current = Date.now();
-      void fireAlarm('🔄 Draaien!', 'Tijd om het vlees te draaien.');
-      onFlip?.();
-    }
-  }, [flipSecLeft, onFlip]);
+  }, [now, flipIntervalMin, lastFlipAt]);
+  const late = flipSecLeft != null && flipSecLeft < 0;
 
   // Custom timers
   useEffect(() => {
@@ -83,16 +80,15 @@ export default function Timers({ startedAt, flipIntervalMin, onFlip }: Props) {
           <Text style={styles.big}>{fmt(totalElapsed)}</Text>
         </View>
         {flipIntervalMin != null && (
-          <Pressable
-            style={styles.block}
-            onPress={() => {
-              lastFlipRef.current = Date.now();
-              setNow(Date.now());
-            }}
-          >
-            <Text style={styles.label}>Draaien over (tik = nu gedraaid)</Text>
-            <Text style={[styles.big, { color: (flipSecLeft ?? 1) < 15 ? theme.colors.warn : theme.colors.text }]}>
-              {flipSecLeft != null ? fmt(flipSecLeft) : '–'}
+          <Pressable style={styles.block} onPress={onFlipReset}>
+            <Text style={styles.label}>{late ? 'Draaien — te laat! (tik = gedraaid)' : 'Draaien over (tik = gedraaid)'}</Text>
+            <Text
+              style={[
+                styles.big,
+                { color: late ? theme.colors.danger : (flipSecLeft ?? 1) < 15 ? theme.colors.warn : theme.colors.text },
+              ]}
+            >
+              {flipSecLeft == null ? '–' : late ? `+${fmt(-flipSecLeft)}` : fmt(flipSecLeft)}
             </Text>
           </Pressable>
         )}
