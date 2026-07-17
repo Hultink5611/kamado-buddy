@@ -54,6 +54,22 @@ export interface Cook {
   notes?: string;
 }
 
+/**
+ * A cook that is currently running. Lives in AppContext (not in a screen) so
+ * the sampling loop, alarms and dashboard-push keep running while you navigate
+ * away from the live screen — and it is persisted so it survives an app
+ * restart / OTA reload.
+ */
+export interface ActiveCook {
+  input: CookInput;
+  startedAt: number;
+  ambientCh: number;
+  meatCh: number;
+  samples: TempSample[];
+  manualAmbient: string;
+  manualMeat: string;
+}
+
 /** A stable vent setting learned for a target temperature band. */
 export interface LearnedSetting {
   bandMaxC: number;

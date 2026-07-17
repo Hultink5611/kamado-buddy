@@ -6,7 +6,6 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { AppProvider } from './state/AppContext';
 import { setupNotifications } from './logic/notifications';
 import { theme } from './theme';
-import type { CookInput } from './logic/types';
 
 import HomeScreen from './screens/HomeScreen';
 import NewCookScreen from './screens/NewCookScreen';
@@ -19,7 +18,7 @@ import SettingsScreen from './screens/SettingsScreen';
 export type RootStackParamList = {
   Home: undefined;
   NewCook: undefined;
-  Cook: { input: CookInput };
+  Cook: undefined;
   Logbook: undefined;
   CookDetail: { cookId: string };
   Calibration: undefined;
