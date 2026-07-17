@@ -11,7 +11,8 @@
  * On any error (e.g. Gemini 429) we fall through to the next available
  * provider. Keys are user-supplied in Settings and stored locally.
  */
-import { MEATS } from '../logic/cook';
+import { slugMeatId } from '../logic/cook';
+import type { CookMethod, Meat } from '../logic/types';
 
 export interface AIKeys {
   openaiKey?: string;
@@ -118,27 +119,72 @@ export async function coachSteer(keys: AIKeys, context: string): Promise<string>
 }
 
 export interface MeatGuess {
+  /** Set when the photo matches an existing meat in the list. */
   meatId?: string;
   name: string;
   notes: string;
+  /** Set when the AI recognised a cut that is NOT in the list yet — ready to add. */
+  newMeat?: Meat;
 }
 
-/** Photo -> best-matching meat in our DB. Needs a vision model: OpenAI or Gemini. */
+function toNum(v: unknown, fallback: number): number {
+  const n = typeof v === 'number' ? v : parseFloat(String(v));
+  return isNaN(n) ? fallback : n;
+}
+
+/** Build a full Meat from the AI's proposed fields, with safe defaults. */
+function buildDiscoveredMeat(name: string, n: Record<string, unknown>): Meat {
+  const method = (['direct', 'indirect', 'reverse'] as CookMethod[]).includes(n.method as CookMethod)
+    ? (n.method as CookMethod)
+    : 'indirect';
+  const estimateType = n.estimateType === 'weight' ? 'weight' : 'thickness';
+  return {
+    id: slugMeatId(name),
+    name,
+    emoji: (typeof n.emoji === 'string' && n.emoji) || '🍖',
+    category: (typeof n.category === 'string' && n.category) || 'Overig',
+    method,
+    domeTempC: toNum(n.domeTempC, 150),
+    coreTempC: n.coreTempC == null ? null : toNum(n.coreTempC, 68),
+    flipIntervalMin: n.flipIntervalMin == null ? null : toNum(n.flipIntervalMin, 0) || null,
+    estimate: {
+      type: estimateType,
+      baseMin: toNum(n.baseMin, 30),
+      minPerCm: n.minPerCm == null ? undefined : toNum(n.minPerCm, 0),
+      minPerKg: n.minPerKg == null ? undefined : toNum(n.minPerKg, 0),
+    },
+    frozenFactor: toNum(n.frozenFactor, 1.5),
+    restMin: toNum(n.restMin, 5),
+    tips: (typeof n.tips === 'string' && n.tips) || '',
+  };
+}
+
+/**
+ * Photo -> best-matching meat, OR a brand-new meat proposal when the cut isn't
+ * in the list yet. Needs a vision model: OpenAI or Gemini.
+ */
 export async function identifyMeat(
   keys: AIKeys,
+  meats: Meat[],
   imageBase64: string,
   description?: string
 ): Promise<MeatGuess> {
   if (!keys.openaiKey && !keys.geminiKey)
     throw new Error('Fotoherkenning vereist een OpenAI- of Gemini-sleutel');
-  const ids = MEATS.map((m) => `${m.id} (${m.name})`).join(', ');
+  const ids = meats.map((m) => `${m.id} (${m.name})`).join(', ');
   const prompt =
     'Bekijk deze foto van rauw vlees/vis voor de BBQ' +
     (description ? ` (omschrijving gebruiker: "${description}")` : '') +
-    '. Kies de best passende id uit deze lijst: ' +
+    '. Als het past bij een id uit deze lijst, geef dat id: ' +
     ids +
-    '. Schat ook de dikte in cm of het gewicht in kg als dat kan. ' +
-    'Antwoord ALLEEN als JSON: {"meatId": "...", "name": "...", "thicknessCm": <n of null>, "weightKg": <n of null>, "notes": "korte tip"}';
+    '. Past het NERGENS bij, zet dan "meatId" op null en vul "new" met een complete, ' +
+    'realistisch geschatte definitie voor dit stuk (BBQ-waarden in °C). ' +
+    'Schat ook dikte (cm) of gewicht (kg). Antwoord ALLEEN als JSON: ' +
+    '{"meatId": "<id of null>", "name": "...", "thicknessCm": <n of null>, "weightKg": <n of null>, ' +
+    '"notes": "korte tip", "new": null of {"emoji":"🍖","category":"...","method":"direct|indirect|reverse",' +
+    '"domeTempC":<n>,"coreTempC":<n of null>,"flipIntervalMin":<n of null>,"restMin":<n>,' +
+    '"estimateType":"thickness|weight","baseMin":<n>,"minPerCm":<n of null>,"minPerKg":<n of null>,' +
+    '"frozenFactor":<n>,"tips":"korte bereidingstip"}}';
 
   // Vision-capable providers, in preference order; fall through on error.
   const vision: Array<() => Promise<string>> = [];
@@ -159,11 +205,15 @@ export async function identifyMeat(
   if (!match) return { name: 'Onbekend', notes: raw.slice(0, 140) };
   try {
     const parsed = JSON.parse(match[0]);
-    return {
-      meatId: MEATS.some((m) => m.id === parsed.meatId) ? parsed.meatId : undefined,
-      name: parsed.name ?? 'Onbekend',
-      notes: parsed.notes ?? '',
-    };
+    const name = parsed.name ?? 'Onbekend';
+    const notes = parsed.notes ?? '';
+    if (parsed.meatId && meats.some((m) => m.id === parsed.meatId)) {
+      return { meatId: parsed.meatId, name, notes };
+    }
+    if (parsed.new && typeof parsed.new === 'object') {
+      return { name, notes, newMeat: buildDiscoveredMeat(name, parsed.new as Record<string, unknown>) };
+    }
+    return { name, notes };
   } catch {
     return { name: 'Onbekend', notes: raw.slice(0, 140) };
   }

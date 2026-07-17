@@ -1,10 +1,86 @@
 import type { Meat, CookInput, TempSample } from './types';
 import meatData from '../data/meats.json';
 
-export const MEATS: Meat[] = (meatData.meats as unknown) as Meat[];
+/** The shipped meat database. Never mutated. */
+export const BUILTIN_MEATS: Meat[] = (meatData.meats as unknown) as Meat[];
+
+/**
+ * User customisation layered on top of the built-in list: fully new meats,
+ * edits to built-in meats (overrides by id) and deleted built-in meats (hidden).
+ * Persisted in AppContext; the module keeps a copy so getMeat() stays in sync.
+ */
+export interface MeatCustomization {
+  added: Meat[];
+  overrides: Record<string, Meat>;
+  hidden: string[];
+}
+
+export const EMPTY_MEAT_CUSTOMIZATION: MeatCustomization = { added: [], overrides: {}, hidden: [] };
+
+let _custom: MeatCustomization = EMPTY_MEAT_CUSTOMIZATION;
+
+/** Keep the module-level registry in sync (call from AppContext on load/change). */
+export function setMeatCustomization(c: MeatCustomization): void {
+  _custom = c;
+}
+
+export function isBuiltinMeat(id: string): boolean {
+  return BUILTIN_MEATS.some((m) => m.id === id);
+}
+
+/** Built-in list (minus deleted, with edits applied) + user-added meats. */
+export function computeMeats(c: MeatCustomization): Meat[] {
+  const base = BUILTIN_MEATS.filter((m) => !c.hidden.includes(m.id)).map(
+    (m) => c.overrides[m.id] ?? m
+  );
+  return [...base, ...c.added];
+}
+
+/** The effective meat list (built-in + customisation). */
+export function allMeats(): Meat[] {
+  return computeMeats(_custom);
+}
 
 export function getMeat(id: string): Meat | undefined {
-  return MEATS.find((m) => m.id === id);
+  return allMeats().find((m) => m.id === id);
+}
+
+/** Pure: add a new meat or update an existing one (built-in edit = override). */
+export function upsertMeat(c: MeatCustomization, meat: Meat): MeatCustomization {
+  if (isBuiltinMeat(meat.id)) {
+    return {
+      ...c,
+      hidden: c.hidden.filter((h) => h !== meat.id),
+      overrides: { ...c.overrides, [meat.id]: meat },
+    };
+  }
+  const exists = c.added.some((m) => m.id === meat.id);
+  return {
+    ...c,
+    added: exists ? c.added.map((m) => (m.id === meat.id ? meat : m)) : [...c.added, meat],
+  };
+}
+
+/** Pure: delete a meat (built-in = hide, custom = remove). */
+export function removeMeat(c: MeatCustomization, id: string): MeatCustomization {
+  if (isBuiltinMeat(id)) {
+    const overrides = { ...c.overrides };
+    delete overrides[id];
+    return { ...c, overrides, hidden: c.hidden.includes(id) ? c.hidden : [...c.hidden, id] };
+  }
+  return { ...c, added: c.added.filter((m) => m.id !== id) };
+}
+
+/** Make a URL-safe, unique-ish id from a name (for user/AI-added meats). */
+export function slugMeatId(name: string): string {
+  const base = name
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 24);
+  return `custom-${base || 'vlees'}-${Math.round(Date.now() % 1e7)}`;
 }
 
 export function resolveTargetCore(meat: Meat, doneness?: string): number | null {
