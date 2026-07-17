@@ -1,0 +1,46 @@
+name: EAS OTA update
+
+# Publiceert bij elke push naar main een Over-The-Air JS/asset-update naar het
+# "preview"-kanaal. Geinstalleerde preview-builds halen 'm bij de volgende keer
+# openen op -- geen herinstallatie nodig.
+#
+# Werkt ALLEEN voor JS/asset-wijzigingen. Native wijzigingen (nieuwe native
+# module, permissions in app.json, SDK-upgrade) vereisen een nieuwe build via
+# eas-android.yml.
+#
+# Vereist hetzelfde EXPO_TOKEN repo-secret als de build-workflow.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    env:
+      EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+    steps:
+      - name: Controleer EXPO_TOKEN
+        run: |
+          if [ -z "$EXPO_TOKEN" ]; then
+            echo "::error::EXPO_TOKEN-secret ontbreekt."
+            exit 1
+          fi
+
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Publish OTA update
+        run: eas update --branch preview --message "${GITHUB_SHA::7} - $(git log -1 --pretty=%s)" --non-interactive
