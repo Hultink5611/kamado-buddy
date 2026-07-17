@@ -85,3 +85,32 @@ export async function clearCookStatus(): Promise<void> {
   lastStatusText = null;
   await Notifications.dismissNotificationAsync(STATUS_ID).catch(() => {});
 }
+
+/**
+ * "Meat can go on" reminder: fires once after `minutes`, so cold meat first
+ * comes to room temperature. OS-scheduled, so it fires even if the app is
+ * backgrounded. Replaces any previous temper reminder.
+ */
+const TEMPER_ID = 'kamado-temper';
+
+export async function scheduleTemperReminder(meatName: string, minutes: number): Promise<void> {
+  if (!configured) await setupNotifications();
+  await Notifications.cancelScheduledNotificationAsync(TEMPER_ID).catch(() => {});
+  if (!minutes || minutes <= 0) return;
+  await Notifications.scheduleNotificationAsync({
+    identifier: TEMPER_ID,
+    content: {
+      title: "🥩 Leg 'm erop!",
+      body: `${meatName} is op kamertemperatuur — tijd om op de BBQ te leggen.`,
+      sound: 'default',
+      data: { kind: 'alarm' },
+    },
+    // @ts-expect-error android-only channel field
+    channelId: 'alarms',
+    trigger: { seconds: Math.round(minutes * 60) },
+  });
+}
+
+export async function cancelTemperReminder(): Promise<void> {
+  await Notifications.cancelScheduledNotificationAsync(TEMPER_ID).catch(() => {});
+}

@@ -155,6 +155,7 @@ function buildDiscoveredMeat(name: string, n: Record<string, unknown>): Meat {
     },
     frozenFactor: toNum(n.frozenFactor, 1.5),
     restMin: toNum(n.restMin, 5),
+    temperMin: n.temperMin == null ? 30 : toNum(n.temperMin, 30),
     tips: (typeof n.tips === 'string' && n.tips) || '',
   };
 }
@@ -184,7 +185,7 @@ export async function identifyMeat(
     '"notes": "korte tip", "new": null of {"emoji":"🍖","category":"...","method":"direct|indirect|reverse",' +
     '"domeTempC":<n>,"coreTempC":<n of null>,"flipIntervalMin":<n of null>,"restMin":<n>,' +
     '"estimateType":"thickness|weight","baseMin":<n>,"minPerCm":<n of null>,"minPerKg":<n of null>,' +
-    '"frozenFactor":<n>,"tips":"korte bereidingstip"}}';
+    '"frozenFactor":<n>,"temperMin":<minuten laten temperen voor het erop gaat>,"tips":"korte bereidingstip"}}';
 
   // Vision-capable providers, in preference order; fall through on error.
   const vision: Array<() => Promise<string>> = [];

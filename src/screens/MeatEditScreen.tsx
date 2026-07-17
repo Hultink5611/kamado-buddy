@@ -28,6 +28,7 @@ const BLANK: Meat = {
   estimate: { type: 'weight', baseMin: 30, minPerKg: 60 },
   frozenFactor: 1.5,
   restMin: 5,
+  temperMin: 30,
   tips: '',
 };
 
@@ -86,6 +87,7 @@ function MeatForm({ draft, onCancel, onSave }: { draft: Meat; onCancel: () => vo
   const [core, setCore] = useState(draft.coreTempC == null ? '' : String(draft.coreTempC));
   const [flip, setFlip] = useState(draft.flipIntervalMin == null ? '' : String(draft.flipIntervalMin));
   const [rest, setRest] = useState(String(draft.restMin));
+  const [temper, setTemper] = useState(draft.temperMin == null ? '' : String(draft.temperMin));
   const [byWeight, setByWeight] = useState(draft.estimate.type === 'weight');
   const [baseMin, setBaseMin] = useState(String(draft.estimate.baseMin));
   const [perUnit, setPerUnit] = useState(
@@ -117,6 +119,7 @@ function MeatForm({ draft, onCancel, onSave }: { draft: Meat; onCancel: () => vo
       coreTempC: core.trim() ? numOr(core, 68) : null,
       flipIntervalMin: flip.trim() ? numOr(flip, 0) : null,
       restMin: numOr(rest, 5),
+      temperMin: temper.trim() ? numOr(temper, 30) : 0,
       estimate: {
         type,
         baseMin: numOr(baseMin, 30),
@@ -156,6 +159,8 @@ function MeatForm({ draft, onCancel, onSave }: { draft: Meat; onCancel: () => vo
         <Field label="Omdraai-interval (min, leeg = niet)" flex={1}><TextInput style={styles.input} value={flip} onChangeText={setFlip} keyboardType="numeric" placeholder="leeg" placeholderTextColor={theme.colors.textDim} /></Field>
         <Field label="Rusttijd (min)" flex={1}><TextInput style={styles.input} value={rest} onChangeText={setRest} keyboardType="numeric" placeholderTextColor={theme.colors.textDim} /></Field>
       </View>
+
+      <Field label="Laten temperen voor 't erop gaat (min)"><TextInput style={styles.input} value={temper} onChangeText={setTemper} keyboardType="numeric" placeholder="0 = direct erop" placeholderTextColor={theme.colors.textDim} /></Field>
 
       <View style={styles.inlineRow}>
         <Text style={styles.label}>Tijd schatten op gewicht (anders dikte)</Text>

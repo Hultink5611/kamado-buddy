@@ -14,6 +14,8 @@ export interface Meat {
   estimate: { type: 'thickness' | 'weight'; baseMin: number; minPerCm?: number; minPerKg?: number };
   frozenFactor: number;
   restMin: number;
+  /** Minutes to let the meat come to room temperature before it goes on. */
+  temperMin?: number;
   tips: string;
 }
 
@@ -68,6 +70,8 @@ export interface ActiveCook {
   samples: TempSample[];
   manualAmbient: string;
   manualMeat: string;
+  /** When the meat was last flipped (for the flip reminder + "late" counter). */
+  lastFlipAt: number;
 }
 
 /** A stable vent setting learned for a target temperature band. */

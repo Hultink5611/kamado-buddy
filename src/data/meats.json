@@ -17,10 +17,15 @@
       "domeTempC": 200,
       "coreTempC": 71,
       "flipIntervalMin": 3,
-      "estimate": { "type": "thickness", "baseMin": 8, "minPerCm": 3 },
+      "estimate": {
+        "type": "thickness",
+        "baseMin": 8,
+        "minPerCm": 3
+      },
       "frozenFactor": 1.5,
       "restMin": 2,
-      "tips": "Gehakt altijd door en door (71°C). Niet platdrukken. Kaas in de laatste 2 min, deksel dicht."
+      "tips": "Gehakt altijd door en door (71°C). Niet platdrukken. Kaas in de laatste 2 min, deksel dicht.",
+      "temperMin": 15
     },
     {
       "id": "steak",
@@ -30,12 +35,23 @@
       "method": "direct",
       "domeTempC": 250,
       "coreTempC": 54,
-      "doneness": { "rare": 50, "medium-rare": 54, "medium": 58, "medium-well": 63, "well": 68 },
+      "doneness": {
+        "rare": 50,
+        "medium-rare": 54,
+        "medium": 58,
+        "medium-well": 63,
+        "well": 68
+      },
       "flipIntervalMin": 2,
-      "estimate": { "type": "thickness", "baseMin": 4, "minPerCm": 3 },
+      "estimate": {
+        "type": "thickness",
+        "baseMin": 4,
+        "minPerCm": 3
+      },
       "frozenFactor": 1.6,
       "restMin": 5,
-      "tips": "Heet en direct dichtschroeien. Dik stuk (>4 cm)? Overweeg reverse sear: eerst indirect naar 46°C, dan kort heet afgrillen."
+      "tips": "Heet en direct dichtschroeien. Dik stuk (>4 cm)? Overweeg reverse sear: eerst indirect naar 46°C, dan kort heet afgrillen.",
+      "temperMin": 30
     },
     {
       "id": "steak_reverse",
@@ -45,13 +61,22 @@
       "method": "reverse",
       "domeTempC": 130,
       "coreTempC": 54,
-      "doneness": { "rare": 50, "medium-rare": 54, "medium": 58 },
+      "doneness": {
+        "rare": 50,
+        "medium-rare": 54,
+        "medium": 58
+      },
       "searDomeTempC": 260,
       "flipIntervalMin": null,
-      "estimate": { "type": "weight", "minPerKg": 40, "baseMin": 20 },
+      "estimate": {
+        "type": "weight",
+        "minPerKg": 40,
+        "baseMin": 20
+      },
       "frozenFactor": 1.5,
       "restMin": 8,
-      "tips": "Indirect tot ~6°C onder doel, dan rooster op de hete kolen en 45-60 sec per kant afschroeien."
+      "tips": "Indirect tot ~6°C onder doel, dan rooster op de hete kolen en 45-60 sec per kant afschroeien.",
+      "temperMin": 45
     },
     {
       "id": "chicken_breast",
@@ -62,10 +87,15 @@
       "domeTempC": 190,
       "coreTempC": 74,
       "flipIntervalMin": 4,
-      "estimate": { "type": "thickness", "baseMin": 10, "minPerCm": 5 },
+      "estimate": {
+        "type": "thickness",
+        "baseMin": 10,
+        "minPerCm": 5
+      },
       "frozenFactor": 1.6,
       "restMin": 3,
-      "tips": "Kip altijd 74°C. Indirect afmaken als de buitenkant te snel kleurt."
+      "tips": "Kip altijd 74°C. Indirect afmaken als de buitenkant te snel kleurt.",
+      "temperMin": 20
     },
     {
       "id": "chicken_thigh",
@@ -76,10 +106,15 @@
       "domeTempC": 190,
       "coreTempC": 78,
       "flipIntervalMin": 4,
-      "estimate": { "type": "thickness", "baseMin": 12, "minPerCm": 5 },
+      "estimate": {
+        "type": "thickness",
+        "baseMin": 12,
+        "minPerCm": 5
+      },
       "frozenFactor": 1.6,
       "restMin": 3,
-      "tips": "Dijen mogen hoger (75-80°C), worden dan botermals."
+      "tips": "Dijen mogen hoger (75-80°C), worden dan botermals.",
+      "temperMin": 20
     },
     {
       "id": "whole_chicken",
@@ -90,10 +125,15 @@
       "domeTempC": 180,
       "coreTempC": 74,
       "flipIntervalMin": null,
-      "estimate": { "type": "weight", "minPerKg": 45, "baseMin": 20 },
+      "estimate": {
+        "type": "weight",
+        "minPerKg": 45,
+        "baseMin": 20
+      },
       "frozenFactor": 1.5,
       "restMin": 10,
-      "tips": "Indirect (deflector). Meet in de dikste bil, niet tegen het bot. Vel knapperig? Laatste 10 min klep verder open."
+      "tips": "Indirect (deflector). Meet in de dikste bil, niet tegen het bot. Vel knapperig? Laatste 10 min klep verder open.",
+      "temperMin": 30
     },
     {
       "id": "pork_chop",
@@ -104,10 +144,15 @@
       "domeTempC": 200,
       "coreTempC": 63,
       "flipIntervalMin": 3,
-      "estimate": { "type": "thickness", "baseMin": 6, "minPerCm": 4 },
+      "estimate": {
+        "type": "thickness",
+        "baseMin": 6,
+        "minPerCm": 4
+      },
       "frozenFactor": 1.5,
       "restMin": 5,
-      "tips": "63°C + 3 min rust = sappig en veilig. Niet naar 75°C, dan wordt 'ie droog."
+      "tips": "63°C + 3 min rust = sappig en veilig. Niet naar 75°C, dan wordt 'ie droog.",
+      "temperMin": 30
     },
     {
       "id": "pulled_pork",
@@ -118,10 +163,15 @@
       "domeTempC": 120,
       "coreTempC": 92,
       "flipIntervalMin": null,
-      "estimate": { "type": "weight", "minPerKg": 90, "baseMin": 60 },
+      "estimate": {
+        "type": "weight",
+        "minPerKg": 90,
+        "baseMin": 60
+      },
       "frozenFactor": 1.4,
       "restMin": 30,
-      "tips": "Low & slow met deflector. Reken een 'stall' rond 70°C in — kan uren duren. Klaar bij 92-95°C, dan valt 'ie uit elkaar."
+      "tips": "Low & slow met deflector. Reken een 'stall' rond 70°C in — kan uren duren. Klaar bij 92-95°C, dan valt 'ie uit elkaar.",
+      "temperMin": 45
     },
     {
       "id": "spare_ribs",
@@ -132,10 +182,15 @@
       "domeTempC": 120,
       "coreTempC": 94,
       "flipIntervalMin": null,
-      "estimate": { "type": "weight", "minPerKg": 150, "baseMin": 180 },
+      "estimate": {
+        "type": "weight",
+        "minPerKg": 150,
+        "baseMin": 180
+      },
       "frozenFactor": 1.3,
       "restMin": 10,
-      "tips": "3-2-1 methode werkt goed. Gaar als het vlees ~1 cm van het bot terugtrekt en een tandenstoker soepel ingaat."
+      "tips": "3-2-1 methode werkt goed. Gaar als het vlees ~1 cm van het bot terugtrekt en een tandenstoker soepel ingaat.",
+      "temperMin": 45
     },
     {
       "id": "brisket",
@@ -146,10 +201,15 @@
       "domeTempC": 110,
       "coreTempC": 94,
       "flipIntervalMin": null,
-      "estimate": { "type": "weight", "minPerKg": 75, "baseMin": 120 },
+      "estimate": {
+        "type": "weight",
+        "minPerKg": 75,
+        "baseMin": 120
+      },
       "frozenFactor": 1.4,
       "restMin": 60,
-      "tips": "Geduld. Wikkel in slagerspapier na de stall (~68°C) om door te duwen. Klaar bij 93-96°C als het als boter voelt."
+      "tips": "Geduld. Wikkel in slagerspapier na de stall (~68°C) om door te duwen. Klaar bij 93-96°C als het als boter voelt.",
+      "temperMin": 60
     },
     {
       "id": "sausage",
@@ -160,10 +220,15 @@
       "domeTempC": 180,
       "coreTempC": 71,
       "flipIntervalMin": 3,
-      "estimate": { "type": "thickness", "baseMin": 10, "minPerCm": 4 },
+      "estimate": {
+        "type": "thickness",
+        "baseMin": 10,
+        "minPerCm": 4
+      },
       "frozenFactor": 1.5,
       "restMin": 2,
-      "tips": "Rustig direct, veel draaien zodat 'ie niet barst. Niet insnijden."
+      "tips": "Rustig direct, veel draaien zodat 'ie niet barst. Niet insnijden.",
+      "temperMin": 15
     },
     {
       "id": "salmon",
@@ -173,12 +238,21 @@
       "method": "direct",
       "domeTempC": 180,
       "coreTempC": 52,
-      "doneness": { "medium-rare": 48, "medium": 52, "doorbakken": 60 },
+      "doneness": {
+        "medium-rare": 48,
+        "medium": 52,
+        "doorbakken": 60
+      },
       "flipIntervalMin": null,
-      "estimate": { "type": "thickness", "baseMin": 8, "minPerCm": 4 },
+      "estimate": {
+        "type": "thickness",
+        "baseMin": 8,
+        "minPerCm": 4
+      },
       "frozenFactor": 1.6,
       "restMin": 2,
-      "tips": "Op het vel, niet draaien. Klaar bij 50-54°C voor sappig. Vel plakt? Rooster goed heet en licht oliën."
+      "tips": "Op het vel, niet draaien. Klaar bij 50-54°C voor sappig. Vel plakt? Rooster goed heet en licht oliën.",
+      "temperMin": 15
     },
     {
       "id": "lamb_chop",
@@ -188,12 +262,21 @@
       "method": "direct",
       "domeTempC": 230,
       "coreTempC": 57,
-      "doneness": { "medium-rare": 54, "medium": 60, "medium-well": 65 },
+      "doneness": {
+        "medium-rare": 54,
+        "medium": 60,
+        "medium-well": 65
+      },
       "flipIntervalMin": 2,
-      "estimate": { "type": "thickness", "baseMin": 4, "minPerCm": 3 },
+      "estimate": {
+        "type": "thickness",
+        "baseMin": 4,
+        "minPerCm": 3
+      },
       "frozenFactor": 1.5,
       "restMin": 5,
-      "tips": "Heet en snel. Vetranden kort direct uitbakken voor smaak."
+      "tips": "Heet en snel. Vetranden kort direct uitbakken voor smaak.",
+      "temperMin": 30
     },
     {
       "id": "veggies",
@@ -204,10 +287,15 @@
       "domeTempC": 200,
       "coreTempC": null,
       "flipIntervalMin": 4,
-      "estimate": { "type": "thickness", "baseMin": 8, "minPerCm": 3 },
+      "estimate": {
+        "type": "thickness",
+        "baseMin": 8,
+        "minPerCm": 3
+      },
       "frozenFactor": 1.3,
       "restMin": 0,
-      "tips": "Op gevoel/kleur, geen kerntemp. Licht oliën tegen plakken."
+      "tips": "Op gevoel/kleur, geen kerntemp. Licht oliën tegen plakken.",
+      "temperMin": 0
     }
   ]
 }
