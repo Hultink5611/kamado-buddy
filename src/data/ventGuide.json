@@ -1,0 +1,13 @@
+{
+  "_meta": {
+    "note": "Startrichtlijnen voor een kleine kamado (GrillMeister mini). bottomVent/topVent zijn fracties open (0 = dicht, 1 = helemaal open). Dit zijn DEFAULTS; de app leert jouw grill en overschrijft ze met jouw eigen stabiele standen. Klepstanden vertaald naar labels: <0.15 = dicht/kier, 0.15-0.4 = kwart, 0.4-0.6 = half, 0.6-0.85 = driekwart, >0.85 = heel open.",
+    "important": "Bovenklep is de fijnregeling, onderschuif de grofregeling. Regel altijd met kleine stapjes en wacht 10 min — een kamado loopt traag na."
+  },
+  "bands": [
+    { "maxC": 135, "label": "Low & slow (rook)", "coalFill": "Tot ~halverwege de kolenkorf", "bottomVent": 0.15, "topVent": 0.2 },
+    { "maxC": 165, "label": "Laag-medium", "coalFill": "Tot ~halverwege", "bottomVent": 0.3, "topVent": 0.3 },
+    { "maxC": 205, "label": "Medium (grillen)", "coalFill": "Tot ~2/3 van de korf", "bottomVent": 0.5, "topVent": 0.5 },
+    { "maxC": 245, "label": "Heet (dichtschroeien)", "coalFill": "Korf goed vol", "bottomVent": 0.8, "topVent": 0.8 },
+    { "maxC": 400, "label": "Zeer heet (searing/pizza)", "coalFill": "Korf vol", "bottomVent": 1.0, "topVent": 1.0 }
+  ]
+}
