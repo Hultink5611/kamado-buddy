@@ -1,9 +1,10 @@
-import React from 'react';
-import { View, Text, StyleSheet, Pressable, ScrollView } from 'react-native';
+import React, { useCallback, useState } from 'react';
+import { View, Text, StyleSheet, Pressable, ScrollView, RefreshControl, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../App';
 import { useApp } from '../state/AppContext';
+import { checkAndApplyUpdate } from '../logic/otaUpdate';
 import { theme } from '../theme';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Home'>;
@@ -11,10 +12,32 @@ type Props = NativeStackScreenProps<RootStackParamList, 'Home'>;
 export default function HomeScreen({ navigation }: Props) {
   const { ink } = useApp();
   const connected = ink.state === 'connected';
+  const [refreshing, setRefreshing] = useState(false);
+
+  // Swipe omlaag = check op een nieuwe OTA-update en herlaad indien beschikbaar.
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    const result = await checkAndApplyUpdate();
+    setRefreshing(false);
+    if (result === 'up-to-date') Alert.alert('Up-to-date', 'Je hebt al de nieuwste versie.');
+    else if (result === 'unavailable') Alert.alert('Niet beschikbaar', 'Updates werken alleen in een geïnstalleerde build.');
+    else if (result === 'error') Alert.alert('Mislukt', 'Kon niet naar updates zoeken. Check je internet.');
+    // 'updated' → de app herlaadt zelf in de nieuwe versie.
+  }, []);
 
   return (
     <SafeAreaView style={styles.safe} edges={['bottom']}>
-      <ScrollView contentContainerStyle={styles.content}>
+      <ScrollView
+        contentContainerStyle={styles.content}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor={theme.colors.textDim}
+            colors={[theme.colors.accent]}
+          />
+        }
+      >
         <View style={[styles.status, { borderColor: connected ? theme.colors.target : theme.colors.line }]}>
           <View style={styles.statusRow}>
             <View
@@ -71,6 +94,7 @@ export default function HomeScreen({ navigation }: Props) {
         <Text style={styles.hint}>
           Tip: sluit de originele Inkbird-app voor je verbindt — er kan maar één app tegelijk met de meter praten.
         </Text>
+        <Text style={styles.hint}>↓ Swipe omlaag om de app bij te werken.</Text>
       </ScrollView>
     </SafeAreaView>
   );
