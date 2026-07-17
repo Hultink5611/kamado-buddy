@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, Pressable, ScrollView, TextInput, Switch, Image
 import * as ImagePicker from 'expo-image-picker';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../App';
-import { getMeat } from '../logic/cook';
+import { getMeat, resolveTargetCore } from '../logic/cook';
 import { identifyMeat } from '../ai/steerAI';
 import { useApp } from '../state/AppContext';
 import { theme } from '../theme';
@@ -22,6 +22,7 @@ export default function NewCookScreen({ navigation }: Props) {
 
   const meat = meatId ? getMeat(meatId) : undefined;
   const useWeight = meat?.estimate.type === 'weight';
+  const targetCore = meat ? resolveTargetCore(meat, doneness) : null;
 
   const pickPhoto = async () => {
     const res = await ImagePicker.launchCameraAsync({ base64: true, quality: 0.5 });
@@ -104,6 +105,20 @@ export default function NewCookScreen({ navigation }: Props) {
 
       {meat && (
         <View style={styles.details}>
+          <View style={styles.goals}>
+            <View style={styles.goal}>
+              <Text style={styles.goalLabel}>🔥 BBQ erop bij</Text>
+              <Text style={styles.goalVal}>{meat.domeTempC}°C</Text>
+            </View>
+            <View style={styles.goal}>
+              <Text style={styles.goalLabel}>🥩 Kern-doel</Text>
+              <Text style={styles.goalVal}>{targetCore != null ? `${targetCore}°C` : 'op gevoel'}</Text>
+            </View>
+            <View style={styles.goal}>
+              <Text style={styles.goalLabel}>⏲️ Temperen</Text>
+              <Text style={styles.goalVal}>{meat.temperMin ?? 0} min</Text>
+            </View>
+          </View>
           <Text style={styles.tips}>{meat.tips}</Text>
 
           {meat.doneness && (
@@ -163,6 +178,10 @@ const styles = StyleSheet.create({
   meatEmoji: { fontSize: 18 },
   meatName: { color: theme.colors.text, fontSize: theme.font.small },
   details: { backgroundColor: theme.colors.card, borderRadius: theme.radius, padding: theme.space(4), gap: theme.space(3) },
+  goals: { flexDirection: 'row', gap: theme.space(2) },
+  goal: { flex: 1, backgroundColor: theme.colors.cardAlt, borderRadius: 12, paddingVertical: theme.space(3), paddingHorizontal: theme.space(2), alignItems: 'center', gap: 2 },
+  goalLabel: { color: theme.colors.textDim, fontSize: theme.font.small, textAlign: 'center' },
+  goalVal: { color: theme.colors.text, fontSize: theme.font.body, fontWeight: '700' },
   tips: { color: theme.colors.textDim, fontSize: theme.font.small, lineHeight: 20 },
   label: { color: theme.colors.text, fontSize: theme.font.small, fontWeight: '600' },
   row: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },

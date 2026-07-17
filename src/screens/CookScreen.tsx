@@ -105,7 +105,7 @@ export default function CookScreen({ navigation }: Props) {
             {temperLeftMin > 0 ? `Nog ~${temperLeftMin} min temperen` : "Klaar — leg 'm erop! 🔥"}
           </Text>
           <Text style={styles.grillPromptSub}>
-            Breng de BBQ op temperatuur en laat het vlees op kamertemperatuur komen. Tik zodra het vlees écht op de BBQ ligt — dan starten de totaaltijd en de draai-timer.
+            Breng de BBQ naar {targetDomeC}°C (nu {currentAmbient != null ? Math.round(currentAmbient) : '–'}°){targetCoreC != null ? ` · kern-doel ${targetCoreC}°C` : ''}. Laat het vlees temperen en tik zodra het écht op de BBQ ligt — dan starten de totaaltijd en de draai-timer.
           </Text>
           <Pressable style={styles.grillBtn} onPress={putOnGrill}>
             <Text style={styles.grillBtnText}>Vlees ligt erop 🔥</Text>
