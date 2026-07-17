@@ -75,7 +75,7 @@ export default function SettingsScreen() {
         <Pressable style={styles.btn} onPress={exportData}><Text style={styles.btnText}>Exporteer logboek (JSON)</Text></Pressable>
       </Section>
 
-      <Text style={styles.version}>Kamado Buddy v0.1 · Inkbird IBT-4XS (iBBQ)</Text>
+      <Text style={styles.version}>Grillmeister v0.1 · Inkbird IBT-4XS (iBBQ)</Text>
     </ScrollView>
   );
 }

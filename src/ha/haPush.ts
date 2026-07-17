@@ -58,27 +58,27 @@ export async function pushToHA(cfg: HAConfig, p: HAPayload): Promise<void> {
     await Promise.all([
       postState(cfg, ENTITY.ambient, p.ambientC ?? 'unknown', {
         unit_of_measurement: '°C', device_class: 'temperature',
-        friendly_name: 'Kamado omgeving', icon: 'mdi:grill',
+        friendly_name: 'Grillmeister omgeving', icon: 'mdi:grill',
       }),
       postState(cfg, ENTITY.meat, p.meatC ?? 'unknown', {
         unit_of_measurement: '°C', device_class: 'temperature',
-        friendly_name: 'Kamado vlees', icon: 'mdi:food-steak',
+        friendly_name: 'Grillmeister vlees', icon: 'mdi:food-steak',
       }),
       postState(cfg, ENTITY.targetDome, p.targetDomeC, {
-        unit_of_measurement: '°C', friendly_name: 'Kamado doel BBQ',
+        unit_of_measurement: '°C', friendly_name: 'Grillmeister doel BBQ',
       }),
       postState(cfg, ENTITY.targetCore, p.targetCoreC ?? 'unknown', {
-        unit_of_measurement: '°C', friendly_name: 'Kamado doel kern',
+        unit_of_measurement: '°C', friendly_name: 'Grillmeister doel kern',
       }),
       postState(cfg, ENTITY.advice, p.advice.headline, {
-        friendly_name: 'Kamado klepadvies',
+        friendly_name: 'Grillmeister klepadvies',
         detail: p.advice.detail, status: p.advice.status,
         onderschuif: p.advice.suggestedBottom, bovenklep: p.advice.suggestedTop,
         kolen: p.advice.coalFill, icon: 'mdi:tune-vertical',
       }),
-      postState(cfg, ENTITY.meatName, p.meatName, { friendly_name: 'Kamado gerecht' }),
+      postState(cfg, ENTITY.meatName, p.meatName, { friendly_name: 'Grillmeister gerecht' }),
       postState(cfg, ENTITY.active, p.active ? 'on' : 'off', {
-        friendly_name: 'Kamado actief', device_class: 'running',
+        friendly_name: 'Grillmeister actief', device_class: 'running',
       }),
     ]);
   } catch {
@@ -91,7 +91,7 @@ export async function pushCookEnded(cfg: HAConfig): Promise<void> {
   if (!cfg.url || !cfg.token) return;
   try {
     await postState(cfg, ENTITY.active, 'off', {
-      friendly_name: 'Kamado actief', device_class: 'running',
+      friendly_name: 'Grillmeister actief', device_class: 'running',
     });
   } catch { /* ignore */ }
 }
