@@ -54,6 +54,8 @@ export interface Cook {
   meatChannel: number; // probe index used for meat
   samples: TempSample[];
   notes?: string;
+  /** Photo of the finished result, taken from the logbook. */
+  resultPhotoUri?: string;
 }
 
 /**

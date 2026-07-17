@@ -1,5 +1,5 @@
 import React, { useCallback, useState } from 'react';
-import { View, Text, StyleSheet, FlatList, Pressable } from 'react-native';
+import { View, Text, StyleSheet, FlatList, Pressable, Image } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../App';
@@ -37,7 +37,11 @@ export default function LogbookScreen({ navigation }: Props) {
         const peakMeat = Math.max(0, ...item.samples.map((s) => s.meatC ?? 0));
         return (
           <Pressable style={styles.row} onPress={() => navigation.navigate('CookDetail', { cookId: item.id })}>
-            <Text style={styles.emoji}>{'🍖'}</Text>
+            {item.resultPhotoUri ? (
+              <Image source={{ uri: item.resultPhotoUri }} style={styles.thumb} />
+            ) : (
+              <Text style={styles.emoji}>{'🍖'}</Text>
+            )}
             <View style={{ flex: 1 }}>
               <Text style={styles.name}>{item.meatName}</Text>
               <Text style={styles.meta}>
@@ -57,7 +61,8 @@ const styles = StyleSheet.create({
   empty: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: theme.space(6) },
   emptyText: { color: theme.colors.textDim, textAlign: 'center' },
   row: { flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: theme.colors.card, borderRadius: theme.radius, padding: theme.space(4) },
-  emoji: { fontSize: 24 },
+  emoji: { fontSize: 24, width: 44, textAlign: 'center' },
+  thumb: { width: 44, height: 44, borderRadius: 8, backgroundColor: theme.colors.cardAlt },
   name: { color: theme.colors.text, fontSize: theme.font.body, fontWeight: '600' },
   meta: { color: theme.colors.textDim, fontSize: theme.font.small, marginTop: 2 },
   chev: { color: theme.colors.textDim, fontSize: 24 },
