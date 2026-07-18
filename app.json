@@ -42,7 +42,15 @@
           "bluetoothAlwaysPermission": "Kamado Buddy gebruikt Bluetooth om je Inkbird-thermometer uit te lezen."
         }
       ],
-      "expo-notifications"
+      "expo-notifications",
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "usesCleartextTraffic": true
+          }
+        }
+      ]
     ],
     "extra": {
       "eas": {
