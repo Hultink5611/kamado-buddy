@@ -43,6 +43,13 @@ export default function SettingsScreen() {
   const setNotify = (patch: Partial<NotifySettings>) =>
     updateSettings({ notify: { ...notify, ...patch } });
 
+  // Save the alarm margin immediately on every valid change (no blur needed).
+  const commitMargin = (v: string) => {
+    setMargin(v);
+    const n = parseInt(v, 10);
+    if (!isNaN(n) && n > 0) void updateSettings({ alarmMarginC: n });
+  };
+
   return (
     <ScrollView contentContainerStyle={styles.content}>
       <Section title="AI (optioneel)">
@@ -75,13 +82,24 @@ export default function SettingsScreen() {
 
       <Section title="Alarmen">
         <Text style={styles.label}>Marge kamado-alarm (± °C)</Text>
-        <Text style={styles.hint}>Hoe ver de BBQ van 't doel mag afwijken vóór het "buiten bereik"-alarm. Hoger = minder meldingen.</Text>
+        <Text style={styles.hint}>Hoe ver de BBQ van 't doel mag afwijken vóór het "buiten bereik"-alarm. Hoger = minder meldingen. Wordt direct opgeslagen.</Text>
+        <View style={styles.chipRow}>
+          {[10, 15, 25, 40].map((n) => {
+            const sel = (parseInt(margin, 10) || 15) === n;
+            return (
+              <Pressable key={n} style={[styles.chip, sel && styles.chipSel]} onPress={() => commitMargin(String(n))}>
+                <Text style={[styles.chipText, sel && { color: '#0d0f12' }]}>±{n}°</Text>
+              </Pressable>
+            );
+          })}
+        </View>
         <TextInput
           style={styles.input}
           value={margin}
-          onChangeText={setMargin}
+          onChangeText={commitMargin}
           keyboardType="numeric"
-          onBlur={() => updateSettings({ alarmMarginC: parseInt(margin, 10) || 15 })}
+          placeholder="bijv. 40"
+          placeholderTextColor={theme.colors.textDim}
         />
       </Section>
 
@@ -142,4 +160,8 @@ const styles = StyleSheet.create({
   version: { color: theme.colors.textDim, fontSize: theme.font.small, textAlign: 'center' },
   notifyRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: theme.space(3), paddingVertical: 4 },
   notifyText: { flex: 1, gap: 2 },
+  chipRow: { flexDirection: 'row', gap: 8, flexWrap: 'wrap', marginTop: 4 },
+  chip: { backgroundColor: theme.colors.cardAlt, borderRadius: 10, paddingVertical: 8, paddingHorizontal: 14 },
+  chipSel: { backgroundColor: theme.colors.accent },
+  chipText: { color: theme.colors.text, fontWeight: '700' },
 });
