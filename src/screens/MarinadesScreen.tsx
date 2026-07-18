@@ -13,6 +13,7 @@ const blankMarinade = (): Marinade => ({
   id: `marinade-${Date.now()}`,
   name: '',
   forMeat: '',
+  amount: '',
   ingredients: '',
   method: '',
   note: '',
@@ -45,7 +46,7 @@ export default function MarinadesScreen() {
     setAiBusy(true);
     try {
       const s = await suggestMarinade(settings.keys, cut.trim());
-      setDraft({ ...blankMarinade(), name: s.name, forMeat: cut.trim(), ingredients: s.ingredients, method: s.method });
+      setDraft({ ...blankMarinade(), name: s.name, forMeat: cut.trim(), amount: s.amount, ingredients: s.ingredients, method: s.method });
       setCut('');
     } catch (e) {
       Alert.alert('AI mislukt', String(e));
@@ -98,7 +99,7 @@ export default function MarinadesScreen() {
             {m.photoUri ? <Image source={{ uri: m.photoUri }} style={styles.thumb} /> : <Text style={styles.rowEmoji}>🧂</Text>}
             <View style={styles.rowMid}>
               <Text style={styles.rowName}>{m.name || 'Naamloos'}</Text>
-              <Text style={styles.rowSub}>{m.forMeat || 'algemeen'}{m.rating != null ? ` · ${m.rating}/10` : ''}</Text>
+              <Text style={styles.rowSub}>{m.forMeat || 'algemeen'}{m.amount ? ` · ${m.amount}` : ''}{m.rating != null ? ` · ${m.rating}/10` : ''}</Text>
             </View>
             <Text style={styles.chev}>›</Text>
           </Pressable>
@@ -121,6 +122,7 @@ function MarinadeForm({
 }) {
   const [name, setName] = useState(draft.name);
   const [forMeat, setForMeat] = useState(draft.forMeat ?? '');
+  const [amount, setAmount] = useState(draft.amount ?? '');
   const [ingredients, setIngredients] = useState(draft.ingredients);
   const [method, setMethod] = useState(draft.method ?? '');
   const [note, setNote] = useState(draft.note ?? '');
@@ -159,6 +161,7 @@ function MarinadeForm({
       ...draft,
       name: name.trim(),
       forMeat: forMeat.trim() || undefined,
+      amount: amount.trim() || undefined,
       ingredients: ingredients.trim(),
       method: method.trim() || undefined,
       note: note.trim() || undefined,
@@ -177,6 +180,7 @@ function MarinadeForm({
     <ScrollView contentContainerStyle={styles.content}>
       <Field label="Naam"><TextInput style={styles.input} value={name} onChangeText={setName} placeholder="bijv. Koreaanse gochujang" placeholderTextColor={theme.colors.textDim} /></Field>
       <Field label="Voor welk vlees"><TextInput style={styles.input} value={forMeat} onChangeText={setForMeat} placeholder="bijv. short rib" placeholderTextColor={theme.colors.textDim} /></Field>
+      <Field label="Voor hoeveel"><TextInput style={styles.input} value={amount} onChangeText={setAmount} placeholder="bijv. 4 hamburgers (~600 g)" placeholderTextColor={theme.colors.textDim} /></Field>
       <Field label="Ingrediënten"><TextInput style={[styles.input, styles.multi]} value={ingredients} onChangeText={setIngredients} multiline placeholder="Eén per regel, met hoeveelheden" placeholderTextColor={theme.colors.textDim} /></Field>
       <Field label="Methode / marineertijd"><TextInput style={[styles.input, styles.multi]} value={method} onChangeText={setMethod} multiline placeholder="Hoe aanmaken + hoe lang marineren" placeholderTextColor={theme.colors.textDim} /></Field>
 
