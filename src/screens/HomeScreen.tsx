@@ -1,14 +1,19 @@
 import React, { useCallback, useState } from 'react';
 import { View, Text, StyleSheet, Pressable, ScrollView, RefreshControl, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import type { CompositeScreenProps } from '@react-navigation/native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import type { RootStackParamList } from '../App';
+import type { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
+import type { MainTabParamList, RootStackParamList } from '../App';
 import { useApp } from '../state/AppContext';
 import { getMeat } from '../logic/cook';
 import { checkAndApplyUpdate } from '../logic/otaUpdate';
 import { theme } from '../theme';
 
-type Props = NativeStackScreenProps<RootStackParamList, 'Home'>;
+type Props = CompositeScreenProps<
+  BottomTabScreenProps<MainTabParamList, 'Home'>,
+  NativeStackScreenProps<RootStackParamList>
+>;
 
 export default function HomeScreen({ navigation }: Props) {
   const { ink, activeCook } = useApp();
@@ -96,7 +101,7 @@ export default function HomeScreen({ navigation }: Props) {
         </Pressable>
 
         <View style={styles.grid}>
-          <Tile emoji="📓" onPress={() => navigation.navigate('Logbook')} label="Logboek" />
+          <Tile emoji="🍖" onPress={() => navigation.navigate('MeatEdit')} label="Vlees" />
           <Tile emoji="🎯" onPress={() => navigation.navigate('Calibration')} label="Kalibratie" />
           <Tile emoji="⚙️" onPress={() => navigation.navigate('Settings')} label="Instellingen" />
         </View>

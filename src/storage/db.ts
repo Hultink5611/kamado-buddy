@@ -1,5 +1,5 @@
 import * as SQLite from 'expo-sqlite';
-import type { Cook, LearnedSetting } from '../logic/types';
+import type { Cook, LearnedSetting, Marinade } from '../logic/types';
 
 let _db: SQLite.SQLiteDatabase | null = null;
 
@@ -19,6 +19,11 @@ async function db(): Promise<SQLite.SQLiteDatabase> {
     );
     CREATE TABLE IF NOT EXISTS learned (
       band_max INTEGER PRIMARY KEY NOT NULL,
+      data TEXT NOT NULL
+    );
+    CREATE TABLE IF NOT EXISTS marinades (
+      id TEXT PRIMARY KEY NOT NULL,
+      created_at INTEGER NOT NULL,
       data TEXT NOT NULL
     );
   `);
@@ -99,6 +104,31 @@ export async function saveLearned(list: LearnedSetting[]): Promise<void> {
       );
     }
   });
+}
+
+/* ---- marinades ---- */
+
+export async function listMarinades(): Promise<Marinade[]> {
+  const d = await db();
+  const rows = await d.getAllAsync<{ data: string }>(
+    'SELECT data FROM marinades ORDER BY created_at DESC'
+  );
+  return rows.map((r) => JSON.parse(r.data) as Marinade);
+}
+
+export async function saveMarinade(m: Marinade): Promise<void> {
+  const d = await db();
+  await d.runAsync(
+    'INSERT OR REPLACE INTO marinades (id, created_at, data) VALUES (?, ?, ?)',
+    m.id,
+    m.createdAt,
+    JSON.stringify(m)
+  );
+}
+
+export async function deleteMarinade(id: string): Promise<void> {
+  const d = await db();
+  await d.runAsync('DELETE FROM marinades WHERE id = ?', id);
 }
 
 /* ---- export ---- */

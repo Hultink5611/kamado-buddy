@@ -1,13 +1,18 @@
 import React, { useCallback, useState } from 'react';
 import { View, Text, StyleSheet, FlatList, Pressable, Image } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
+import type { CompositeScreenProps } from '@react-navigation/native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import type { RootStackParamList } from '../App';
+import type { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
+import type { MainTabParamList, RootStackParamList } from '../App';
 import { listCooks } from '../storage/db';
 import type { Cook } from '../logic/types';
 import { theme } from '../theme';
 
-type Props = NativeStackScreenProps<RootStackParamList, 'Logbook'>;
+type Props = CompositeScreenProps<
+  BottomTabScreenProps<MainTabParamList, 'Logbook'>,
+  NativeStackScreenProps<RootStackParamList>
+>;
 
 export default function LogbookScreen({ navigation }: Props) {
   const [cooks, setCooks] = useState<Cook[]>([]);
