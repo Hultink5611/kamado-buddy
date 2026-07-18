@@ -161,7 +161,8 @@ export default function MarinadesScreen() {
             {m.photoUri ? <Image source={{ uri: m.photoUri }} style={styles.thumb} /> : <Text style={styles.rowEmoji}>🧂</Text>}
             <View style={styles.rowMid}>
               <Text style={styles.rowName}>{m.name || 'Naamloos'}</Text>
-              <Text style={styles.rowSub}>{m.forMeat || 'algemeen'}{m.amount ? ` · ${m.amount}` : ''}{m.rating != null ? ` · ${m.rating}/10` : ''}</Text>
+              <Text style={styles.rowSub}>{m.forMeat || 'algemeen'}{m.rating != null ? ` · ${m.rating}/10` : ''}</Text>
+              {m.amount ? <Text style={styles.rowAmount}>🍽️ voor {m.amount}</Text> : null}
             </View>
             <Text style={styles.chev}>›</Text>
           </Pressable>
@@ -313,6 +314,7 @@ const styles = StyleSheet.create({
   rowMid: { flex: 1, gap: 2 },
   rowName: { color: theme.colors.text, fontSize: theme.font.body, fontWeight: '600' },
   rowSub: { color: theme.colors.textDim, fontSize: theme.font.small },
+  rowAmount: { color: theme.colors.accent, fontSize: theme.font.small, fontWeight: '600' },
   chev: { color: theme.colors.textDim, fontSize: 24 },
   field: { gap: 4 },
   label: { color: theme.colors.text, fontSize: theme.font.small, fontWeight: '600' },
