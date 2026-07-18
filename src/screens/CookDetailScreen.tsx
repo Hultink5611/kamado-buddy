@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, Pressable, Alert, Image } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Pressable, Alert, Image, TextInput } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import * as FileSystem from 'expo-file-system';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -13,12 +13,25 @@ type Props = NativeStackScreenProps<RootStackParamList, 'CookDetail'>;
 
 export default function CookDetailScreen({ route, navigation }: Props) {
   const [cook, setCook] = useState<Cook | null>(null);
+  const [notes, setNotes] = useState('');
 
   useEffect(() => {
-    getCook(route.params.cookId).then(setCook);
+    getCook(route.params.cookId).then((c) => {
+      setCook(c);
+      setNotes(c?.notes ?? '');
+    });
   }, [route.params.cookId]);
 
   if (!cook) return <View style={styles.center}><Text style={styles.dim}>Laden…</Text></View>;
+
+  // Save the note; keeps every other field (incl. the cook's date) intact.
+  const saveNotes = async () => {
+    const trimmed = notes.trim();
+    if (trimmed === (cook.notes ?? '')) return;
+    const updated = { ...cook, notes: trimmed || undefined };
+    await saveCook(updated);
+    setCook(updated);
+  };
 
   const mins = cook.endedAt ? Math.round((cook.endedAt - cook.startedAt) / 60000) : 0;
   const peakMeat = Math.max(0, ...cook.samples.map((s) => s.meatC ?? 0));
@@ -81,6 +94,20 @@ export default function CookDetailScreen({ route, navigation }: Props) {
 
       {cook.input.frozen && <Text style={styles.dim}>❄️ Uit de diepvries gestart</Text>}
 
+      <View style={styles.notesBlock}>
+        <Text style={styles.photoH}>📝 Opmerkingen</Text>
+        <TextInput
+          style={styles.notes}
+          value={notes}
+          onChangeText={setNotes}
+          onBlur={saveNotes}
+          multiline
+          placeholder="Hoe ging 't? Wat de volgende keer anders? Rub, hout, gasten…"
+          placeholderTextColor={theme.colors.textDim}
+        />
+        <Text style={styles.photoHint}>Wordt automatisch opgeslagen.</Text>
+      </View>
+
       <View style={styles.photoBlock}>
         <Text style={styles.photoH}>📸 Eindresultaat</Text>
         {cook.resultPhotoUri ? (
@@ -122,6 +149,8 @@ const styles = StyleSheet.create({
   statValue: { color: theme.colors.text, fontSize: theme.font.h2, fontWeight: '700', marginTop: 2 },
   del: { paddingVertical: 12, alignItems: 'center' },
   delText: { color: theme.colors.danger, fontWeight: '600' },
+  notesBlock: { gap: theme.space(2) },
+  notes: { backgroundColor: theme.colors.card, borderRadius: theme.radius, padding: theme.space(3), color: theme.colors.text, minHeight: 90, textAlignVertical: 'top', fontSize: theme.font.body },
   photoBlock: { gap: theme.space(2) },
   photoH: { color: theme.colors.text, fontSize: theme.font.h2, fontWeight: '700' },
   photo: { width: '100%', height: 240, borderRadius: theme.radius, backgroundColor: theme.colors.card },
