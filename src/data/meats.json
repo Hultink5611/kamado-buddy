@@ -19,12 +19,12 @@
       "flipIntervalMin": 3,
       "estimate": {
         "type": "thickness",
-        "baseMin": 8,
+        "baseMin": 5,
         "minPerCm": 3
       },
       "frozenFactor": 1.5,
       "restMin": 2,
-      "tips": "Gehakt altijd door en door (71°C). Niet platdrukken. Kaas in de laatste 2 min, deksel dicht.",
+      "tips": "Gehakt altijd door en door (71°C). Niet platdrukken. Kaas in de laatste 2 min, deksel dicht. Reken ~4-5 min per kant direct.",
       "temperMin": 15
     },
     {
@@ -46,11 +46,11 @@
       "estimate": {
         "type": "thickness",
         "baseMin": 4,
-        "minPerCm": 3
+        "minPerCm": 2
       },
       "frozenFactor": 1.6,
       "restMin": 5,
-      "tips": "Heet en direct dichtschroeien. Dik stuk (>4 cm)? Overweeg reverse sear: eerst indirect naar 46°C, dan kort heet afgrillen.",
+      "tips": "Heet en direct dichtschroeien, ~2-3 min per kant. Dik stuk (>4 cm)? Overweeg reverse sear: eerst indirect naar 46°C, dan kort heet afgrillen.",
       "temperMin": 30
     },
     {
@@ -90,12 +90,12 @@
       "flipIntervalMin": 4,
       "estimate": {
         "type": "thickness",
-        "baseMin": 10,
-        "minPerCm": 5
+        "baseMin": 8,
+        "minPerCm": 4
       },
       "frozenFactor": 1.6,
       "restMin": 3,
-      "tips": "Kip altijd 74°C. Indirect afmaken als de buitenkant te snel kleurt.",
+      "tips": "Kip altijd 74°C. Indirect afmaken als de buitenkant te snel kleurt. Dikke filet? Vlinder 'm open voor gelijkmatig garen.",
       "temperMin": 20
     },
     {
@@ -109,12 +109,12 @@
       "flipIntervalMin": 4,
       "estimate": {
         "type": "thickness",
-        "baseMin": 12,
-        "minPerCm": 5
+        "baseMin": 10,
+        "minPerCm": 4
       },
       "frozenFactor": 1.6,
       "restMin": 3,
-      "tips": "Dijen mogen hoger (75-80°C), worden dan botermals.",
+      "tips": "Dijen mogen hoger (75-80°C), worden dan botermals. Met bot duurt 't langer dan zonder.",
       "temperMin": 20
     },
     {
@@ -148,13 +148,32 @@
       "flipIntervalMin": 3,
       "estimate": {
         "type": "thickness",
-        "baseMin": 6,
-        "minPerCm": 4
+        "baseMin": 4,
+        "minPerCm": 3
       },
       "frozenFactor": 1.5,
       "restMin": 5,
-      "tips": "63°C + 3 min rust = sappig en veilig. Niet naar 75°C, dan wordt 'ie droog.",
+      "tips": "63°C + 3 min rust = sappig en veilig. Niet naar 75°C, dan wordt 'ie droog. Reken ~4-6 min per kant.",
       "temperMin": 30
+    },
+    {
+      "id": "pork_neck_steak",
+      "name": "Houthakkersteak (varkensnek)",
+      "emoji": "🪓",
+      "category": "Varken",
+      "method": "direct",
+      "domeTempC": 180,
+      "coreTempC": 63,
+      "flipIntervalMin": 3,
+      "estimate": {
+        "type": "thickness",
+        "baseMin": 4,
+        "minPerCm": 3
+      },
+      "frozenFactor": 1.5,
+      "restMin": 3,
+      "tips": "Dun (~1,5-2 cm) en meestal gemarineerd: matig vuur, anders verbrandt de marinade. Reken 3-4 min per kant. Druipvet geeft steekvlammen → indirect of grillplaat is veiliger. Kern 63-65°C, licht rosé mag bij nek.",
+      "temperMin": 20
     },
     {
       "id": "pulled_pork",
@@ -227,12 +246,12 @@
       "flipIntervalMin": 3,
       "estimate": {
         "type": "thickness",
-        "baseMin": 10,
-        "minPerCm": 4
+        "baseMin": 8,
+        "minPerCm": 3
       },
       "frozenFactor": 1.5,
       "restMin": 2,
-      "tips": "Rustig direct, veel draaien zodat 'ie niet barst. Niet insnijden.",
+      "tips": "Rustig direct (~12-15 min totaal), veel draaien zodat 'ie niet barst. Niet insnijden.",
       "temperMin": 15
     },
     {
@@ -251,12 +270,12 @@
       "flipIntervalMin": null,
       "estimate": {
         "type": "thickness",
-        "baseMin": 8,
-        "minPerCm": 4
+        "baseMin": 6,
+        "minPerCm": 3
       },
       "frozenFactor": 1.6,
       "restMin": 2,
-      "tips": "Op het vel, niet draaien. Klaar bij 50-54°C voor sappig. Vel plakt? Rooster goed heet en licht oliën.",
+      "tips": "Op het vel, niet draaien (~12-15 min totaal). Klaar bij 50-54°C voor sappig. Vel plakt? Rooster goed heet en licht oliën.",
       "temperMin": 15
     },
     {
@@ -299,7 +318,7 @@
       },
       "frozenFactor": 1.3,
       "restMin": 0,
-      "tips": "Op gevoel/kleur, geen kerntemp. Licht oliën tegen plakken.",
+      "tips": "Op gevoel/kleur, geen kerntemp. Licht oliën tegen plakken. Zacht & sappig: in een foliebakje; rooksmaak & randjes: los op het rooster of aan spiesen.",
       "temperMin": 0
     }
   ]

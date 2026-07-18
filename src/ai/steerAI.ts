@@ -172,7 +172,12 @@ export async function identifyMeat(
     '. Twijfel je, of is het een andere snit? Zet dan "meatId" op null en vul "new" met een ' +
     'complete, realistisch geschatte definitie voor dit specifieke stuk (BBQ-waarden in °C, ' +
     'gebruik de juiste Nederlandse naam van de snit als "name"). ' +
-    'Schat ook dikte (cm) of gewicht (kg). Antwoord ALLEEN als JSON: ' +
+    'Schat ook dikte (cm) of gewicht (kg). ' +
+    'BELANGRIJK bij de tijdschatting (baseMin/minPerCm/minPerKg): wees realistisch. ' +
+    'Dunne stukken (steaks, koteletten, filets van 1-3 cm) zijn direct in 8-15 min TOTAAL klaar ' +
+    '(baseMin 4-6, minPerCm 2-3) — niet 30-40 min. Alleen grote stukken (hele kip, rollade) of ' +
+    'low & slow (schouder, ribs, brisket) duren lang. ' +
+    'Antwoord ALLEEN als JSON: ' +
     '{"meatId": "<id of null>", "name": "...", "thicknessCm": <n of null>, "weightKg": <n of null>, ' +
     '"notes": "korte tip", "new": null of {"emoji":"🍖","category":"...","method":"direct|indirect|reverse",' +
     '"domeTempC":<n>,"coreTempC":<n of null>,"flipIntervalMin":<n of null>,"restMin":<n>,' +
