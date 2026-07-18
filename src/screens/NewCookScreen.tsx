@@ -3,11 +3,11 @@ import { View, Text, StyleSheet, Pressable, ScrollView, TextInput, Switch, Image
 import * as ImagePicker from 'expo-image-picker';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../App';
-import { getMeat, resolveTargetCore } from '../logic/cook';
+import { getMeat, resolveTargetCore, estimateCookMinutes } from '../logic/cook';
 import { identifyMeat } from '../ai/steerAI';
 import { useApp } from '../state/AppContext';
 import { listMarinades } from '../storage/db';
-import type { Marinade } from '../logic/types';
+import type { Marinade, CookInput } from '../logic/types';
 import PickerSheet from '../components/PickerSheet';
 import { theme } from '../theme';
 
@@ -25,19 +25,42 @@ export default function NewCookScreen({ navigation }: Props) {
   const [marinades, setMarinades] = useState<Marinade[]>([]);
   const [marinadeId, setMarinadeId] = useState<string | undefined>();
   const [marinadeName, setMarinadeName] = useState<string | undefined>();
+  const [domeOverride, setDomeOverride] = useState('');
+  const [coreOverride, setCoreOverride] = useState('');
 
   const meat = meatId ? getMeat(meatId) : undefined;
   const useWeight = meat?.estimate.type === 'weight';
-  const targetCore = meat ? resolveTargetCore(meat, doneness) : null;
+  const defaultCore = meat ? resolveTargetCore(meat, doneness) : null;
+  // Effective targets: a user override wins over the meat default.
+  const domeOverrideC = domeOverride ? parseInt(domeOverride, 10) : undefined;
+  const coreOverrideC = coreOverride ? parseInt(coreOverride, 10) : undefined;
+  const effDome = domeOverrideC ?? meat?.domeTempC;
+  const effCore = coreOverrideC ?? defaultCore;
+  const targetCore = effCore; // shown in the plan below
 
   useEffect(() => {
     listMarinades().then(setMarinades);
   }, []);
-  // Reset the marinade choice whenever the cut changes.
+  // Reset the marinade choice + temperature overrides whenever the cut changes.
   useEffect(() => {
     setMarinadeId(undefined);
     setMarinadeName(undefined);
+    setDomeOverride('');
+    setCoreOverride('');
   }, [meatId]);
+
+  // Live "plan": estimated total minutes, accounting for a lower slow-cook temp.
+  const estMin = meat
+    ? estimateCookMinutes(meat, {
+        meatId: meat.id,
+        doneness,
+        frozen,
+        weightKg: weight ? parseFloat(weight.replace(',', '.')) : undefined,
+        thicknessCm: thickness ? parseFloat(thickness.replace(',', '.')) : undefined,
+        domeTempOverrideC: domeOverrideC,
+      })
+    : null;
+  const fmtDur = (m: number) => (m >= 60 ? `${Math.floor(m / 60)} u ${m % 60} min` : `${m} min`);
   const cutMarinades = meatId ? marinades.filter((m) => m.meatId === meatId) : [];
 
   const pickPhoto = async () => {
@@ -84,6 +107,8 @@ export default function NewCookScreen({ navigation }: Props) {
       photoUri,
       marinadeId,
       marinadeName,
+      domeTempOverrideC: domeOverrideC,
+      coreTempOverrideC: coreOverrideC,
     });
     navigation.replace('Cook');
   };
@@ -125,19 +150,59 @@ export default function NewCookScreen({ navigation }: Props) {
         <View style={styles.details}>
           <View style={styles.goals}>
             <View style={styles.goal}>
-              <Text style={styles.goalLabel}>🔥 BBQ erop bij</Text>
-              <Text style={styles.goalVal}>{meat.domeTempC}°C</Text>
+              <Text style={styles.goalLabel}>🔥 BBQ-doel</Text>
+              <Text style={[styles.goalVal, domeOverrideC != null && styles.goalValOverride]}>{effDome}°C</Text>
             </View>
             <View style={styles.goal}>
               <Text style={styles.goalLabel}>🥩 Kern-doel</Text>
-              <Text style={styles.goalVal}>{targetCore != null ? `${targetCore}°C` : 'op gevoel'}</Text>
+              <Text style={[styles.goalVal, coreOverrideC != null && styles.goalValOverride]}>{targetCore != null ? `${targetCore}°C` : 'op gevoel'}</Text>
             </View>
             <View style={styles.goal}>
-              <Text style={styles.goalLabel}>⏲️ Temperen</Text>
-              <Text style={styles.goalVal}>{meat.temperMin ?? 0} min</Text>
+              <Text style={styles.goalLabel}>⏱️ Verwachte tijd</Text>
+              <Text style={styles.goalVal}>± {estMin != null ? fmtDur(estMin) : '–'}</Text>
             </View>
           </View>
           <Text style={styles.tips}>{meat.tips}</Text>
+
+          <View style={styles.slowBox}>
+            <Text style={styles.label}>🐢 BBQ-temperatuur zelf kiezen (slow cook)</Text>
+            <View style={styles.row}>
+              {[
+                { label: 'Standaard', v: '' },
+                { label: '120°', v: '120' },
+                { label: '150°', v: '150' },
+                { label: '180°', v: '180' },
+              ].map((opt) => {
+                const sel = domeOverride === opt.v;
+                return (
+                  <Pressable key={opt.label} style={[styles.smallChip, sel && styles.smallChipSel]} onPress={() => setDomeOverride(opt.v)}>
+                    <Text style={[styles.smallChipText, sel && { color: '#0d0f12' }]}>{opt.label}</Text>
+                  </Pressable>
+                );
+              })}
+            </View>
+            <TextInput
+              style={styles.input}
+              keyboardType="numeric"
+              placeholder={`Eigen temp, bijv. ${meat.domeTempC}`}
+              placeholderTextColor={theme.colors.textDim}
+              value={domeOverride}
+              onChangeText={setDomeOverride}
+            />
+            <Text style={styles.label}>🥩 Kern-doel zelf (optioneel)</Text>
+            <TextInput
+              style={styles.input}
+              keyboardType="numeric"
+              placeholder={defaultCore != null ? `Standaard ${defaultCore}° — bijv. 68 voor gaar` : 'bijv. 68'}
+              placeholderTextColor={theme.colors.textDim}
+              value={coreOverride}
+              onChangeText={setCoreOverride}
+            />
+            <Text style={styles.hintSmall}>
+              📋 Plan: BBQ {effDome}°C{targetCore != null ? ` · kern-doel ${targetCore}°C` : ' · op gevoel'} · ± {estMin != null ? fmtDur(estMin) : '–'}.
+              {domeOverrideC != null && meat.domeTempC != null && domeOverrideC < meat.domeTempC ? ' Lager dan standaard, dus langzamer en malser.' : ''}
+            </Text>
+          </View>
 
           {meat.doneness && (
             <>
@@ -217,6 +282,8 @@ const styles = StyleSheet.create({
   goal: { flex: 1, backgroundColor: theme.colors.cardAlt, borderRadius: 12, paddingVertical: theme.space(3), paddingHorizontal: theme.space(2), alignItems: 'center', gap: 2 },
   goalLabel: { color: theme.colors.textDim, fontSize: theme.font.small, textAlign: 'center' },
   goalVal: { color: theme.colors.text, fontSize: theme.font.body, fontWeight: '700' },
+  goalValOverride: { color: theme.colors.accent },
+  slowBox: { backgroundColor: theme.colors.cardAlt, borderRadius: 12, padding: theme.space(3), gap: theme.space(2) },
   tips: { color: theme.colors.textDim, fontSize: theme.font.small, lineHeight: 20 },
   hintSmall: { color: theme.colors.textDim, fontSize: theme.font.small },
   label: { color: theme.colors.text, fontSize: theme.font.small, fontWeight: '600' },

@@ -90,6 +90,16 @@ export function resolveTargetCore(meat: Meat, doneness?: string): number | null 
   return meat.coreTempC;
 }
 
+/** Effective BBQ/dome target: a user override wins over the meat's default. */
+export function resolveTargetDome(meat: Meat, input: CookInput): number {
+  return input.domeTempOverrideC ?? meat.domeTempC;
+}
+
+/** Effective core target: explicit override > doneness/meat default. */
+export function resolveTargetCoreForInput(meat: Meat, input: CookInput): number | null {
+  return input.coreTempOverrideC ?? resolveTargetCore(meat, input.doneness);
+}
+
 /**
  * Rough estimate of total cook minutes. Direct cooks scale with thickness,
  * low & slow with weight. Frozen multiplies. This is a *starting* estimate;
@@ -106,6 +116,12 @@ export function estimateCookMinutes(meat: Meat, input: CookInput): number {
     mins = e.baseMin + (e.minPerKg ?? 0) * kg;
   }
   if (input.frozen) mins *= meat.frozenFactor;
+  // Lower BBQ temperature than the meat's default → cooks slower, so stretch the
+  // estimate. Rough first-order scaling; the meat probe is the real signal.
+  const dome = input.domeTempOverrideC;
+  if (dome && dome > 0 && dome < meat.domeTempC) {
+    mins *= Math.min(2.5, meat.domeTempC / dome);
+  }
   return Math.round(mins);
 }
 

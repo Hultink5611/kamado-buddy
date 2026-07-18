@@ -39,6 +39,10 @@ export interface CookInput {
   /** Optional marinade used for this cook (shown in the logbook). */
   marinadeId?: string;
   marinadeName?: string;
+  /** User override of the BBQ/dome target (°C) — e.g. slow cook at 150. */
+  domeTempOverrideC?: number;
+  /** User override of the target core temp (°C). */
+  coreTempOverrideC?: number;
 }
 
 export interface TempSample {
