@@ -21,7 +21,8 @@ export interface AIKeys {
 }
 
 const OPENAI_URL = 'https://api.openai.com/v1/chat/completions';
-const OPENAI_MODEL = 'gpt-4o-mini'; // cheap, supports vision
+const OPENAI_MODEL = 'gpt-4o-mini'; // cheap, for text coaching
+const OPENAI_VISION_MODEL = 'gpt-4o'; // sterker in vlees-/vissnit-herkenning
 const GEMINI_URL =
   'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent';
 const GROQ_URL = 'https://api.groq.com/openai/v1/chat/completions';
@@ -37,7 +38,7 @@ async function callOpenAI(
         { type: 'text', text: prompt },
         {
           type: 'image_url',
-          image_url: { url: `data:image/jpeg;base64,${imageBase64}` },
+          image_url: { url: `data:image/jpeg;base64,${imageBase64}`, detail: 'high' },
         },
       ]
     : prompt;
@@ -48,9 +49,10 @@ async function callOpenAI(
       Authorization: `Bearer ${key}`,
     },
     body: JSON.stringify({
-      model: OPENAI_MODEL,
+      // Use the stronger vision model when there's an image.
+      model: imageBase64 ? OPENAI_VISION_MODEL : OPENAI_MODEL,
       messages: [{ role: 'user', content }],
-      temperature: 0.3,
+      temperature: 0.2,
     }),
   });
   if (!res.ok) throw new Error(`OpenAI ${res.status}`);
@@ -174,12 +176,16 @@ export async function identifyMeat(
     throw new Error('Fotoherkenning vereist een OpenAI- of Gemini-sleutel');
   const ids = meats.map((m) => `${m.id} (${m.name})`).join(', ');
   const prompt =
-    'Bekijk deze foto van rauw vlees/vis voor de BBQ' +
-    (description ? ` (omschrijving gebruiker: "${description}")` : '') +
-    '. Als het past bij een id uit deze lijst, geef dat id: ' +
+    'Je bent een slager/BBQ-expert. Identificeer het EXACTE stuk vlees of vis op de foto, ' +
+    'in het Nederlands en zo specifiek mogelijk qua snit (denk aan: buikspek, procureur, ' +
+    'picanha, entrecote, spareribs, kipdij, zalmfilet, enz.). Let op vorm, vetdek, vezels en kleur — ' +
+    'verwar snitten niet (buikspek is bijv. GEEN kotelet).' +
+    (description ? ` De gebruiker omschrijft het als: "${description}".` : '') +
+    ' Kies alléén een id uit deze lijst als het ECHT exact dezelfde snit is: ' +
     ids +
-    '. Past het NERGENS bij, zet dan "meatId" op null en vul "new" met een complete, ' +
-    'realistisch geschatte definitie voor dit stuk (BBQ-waarden in °C). ' +
+    '. Twijfel je, of is het een andere snit? Zet dan "meatId" op null en vul "new" met een ' +
+    'complete, realistisch geschatte definitie voor dit specifieke stuk (BBQ-waarden in °C, ' +
+    'gebruik de juiste Nederlandse naam van de snit als "name"). ' +
     'Schat ook dikte (cm) of gewicht (kg). Antwoord ALLEEN als JSON: ' +
     '{"meatId": "<id of null>", "name": "...", "thicknessCm": <n of null>, "weightKg": <n of null>, ' +
     '"notes": "korte tip", "new": null of {"emoji":"🍖","category":"...","method":"direct|indirect|reverse",' +

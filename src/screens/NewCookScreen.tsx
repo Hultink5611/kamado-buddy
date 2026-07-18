@@ -25,7 +25,7 @@ export default function NewCookScreen({ navigation }: Props) {
   const targetCore = meat ? resolveTargetCore(meat, doneness) : null;
 
   const pickPhoto = async () => {
-    const res = await ImagePicker.launchCameraAsync({ base64: true, quality: 0.5 });
+    const res = await ImagePicker.launchCameraAsync({ base64: true, quality: 0.7 });
     if (res.canceled || !res.assets[0]) return;
     const asset = res.assets[0];
     setPhotoUri(asset.uri);
