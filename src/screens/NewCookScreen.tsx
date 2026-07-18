@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, Pressable, ScrollView, TextInput, Switch, Image
 import * as ImagePicker from 'expo-image-picker';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../App';
-import { getMeat, resolveTargetCore, estimateCookMinutes } from '../logic/cook';
+import { getMeat, resolveTargetCore, estimateCookMinutes, isBuiltinMeat } from '../logic/cook';
 import { identifyMeat } from '../ai/steerAI';
 import { useApp } from '../state/AppContext';
 import { listMarinades } from '../storage/db';
@@ -170,6 +170,9 @@ export default function NewCookScreen({ navigation }: Props) {
             <View style={styles.storyBox}>
               <Text style={styles.storyH}>📖 Zo doen de meesten het</Text>
               <Text style={styles.storyText}>{meat.story}</Text>
+              {!isBuiltinMeat(meat.id) && (
+                <Text style={styles.storySource}>AI-schatting — controleer/verfijn via Meer → Vlees beheren.</Text>
+              )}
             </View>
           ) : null}
 
@@ -309,6 +312,7 @@ const styles = StyleSheet.create({
   storyBox: { backgroundColor: theme.colors.cardAlt, borderRadius: 12, padding: theme.space(3), gap: 4 },
   storyH: { color: theme.colors.text, fontSize: theme.font.small, fontWeight: '700' },
   storyText: { color: theme.colors.textDim, fontSize: theme.font.small, lineHeight: 20, fontStyle: 'italic' },
+  storySource: { color: theme.colors.accent, fontSize: 11, marginTop: 2 },
   hintSmall: { color: theme.colors.textDim, fontSize: theme.font.small },
   label: { color: theme.colors.text, fontSize: theme.font.small, fontWeight: '600' },
   row: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },

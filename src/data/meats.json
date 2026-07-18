@@ -335,6 +335,179 @@
       "tips": "Op gevoel/kleur, geen kerntemp. Licht oliën tegen plakken. Zacht & sappig: in een foliebakje; rooksmaak & randjes: los op het rooster of aan spiesen.",
       "temperMin": 0,
       "story": "Direct op het rooster of in een groentemand rond 200°C, deksel dicht en regelmatig husselen/keren. Zachte of gemarineerde groente doen de meesten in een foliebakje op de indirecte kant."
+    },
+    {
+      "id": "picanha",
+      "name": "Picanha",
+      "emoji": "🥩",
+      "category": "Rund",
+      "method": "reverse",
+      "domeTempC": 130,
+      "searDomeTempC": 260,
+      "coreTempC": 54,
+      "doneness": {
+        "rare": 50,
+        "medium-rare": 54,
+        "medium": 58
+      },
+      "flipIntervalMin": null,
+      "estimate": {
+        "type": "weight",
+        "baseMin": 15,
+        "minPerKg": 50
+      },
+      "typicalWeightKg": 1.2,
+      "frozenFactor": 1.5,
+      "restMin": 8,
+      "temperMin": 45,
+      "tips": "Vetlaag laten zitten — die smelt en bedruipt het vlees. Tegen de draad in snijden.",
+      "story": "Op de kamado meestal in z'n geheel: indirect met deflector op ~130°C tot ~48°C kern, dan de deflector eruit en de vetkant kort hard afschroeien. In Brazilië gaan er repen aan spiesen — kan ook, dan direct en vaak keren."
+    },
+    {
+      "id": "bavette",
+      "name": "Bavette",
+      "emoji": "🥩",
+      "category": "Rund",
+      "method": "direct",
+      "domeTempC": 250,
+      "coreTempC": 54,
+      "doneness": {
+        "rare": 50,
+        "medium-rare": 54,
+        "medium": 58
+      },
+      "flipIntervalMin": 2,
+      "estimate": {
+        "type": "thickness",
+        "baseMin": 4,
+        "minPerCm": 2
+      },
+      "frozenFactor": 1.6,
+      "restMin": 7,
+      "temperMin": 30,
+      "tips": "Grof gevezeld en vol van smaak. Nooit verder dan medium, en altijd tegen de draad in snijden.",
+      "story": "Heet en kort: direct zonder deflector op 250°C+, deksel open, 2-3 min per kant en 1-2x keren. Daarna goed laten rusten en dun tegen de draad in snijden — anders wordt 'ie taai."
+    },
+    {
+      "id": "pork_belly_slow",
+      "name": "Buikspek (low & slow)",
+      "emoji": "🥓",
+      "category": "Varken (low & slow)",
+      "method": "indirect",
+      "domeTempC": 140,
+      "coreTempC": 90,
+      "flipIntervalMin": null,
+      "estimate": {
+        "type": "weight",
+        "baseMin": 30,
+        "minPerKg": 90
+      },
+      "typicalWeightKg": 1,
+      "frozenFactor": 1.4,
+      "restMin": 15,
+      "temperMin": 30,
+      "tips": "Klaar rond 88-92°C als een prikker er zonder weerstand in glijdt. Zwoerd vooraf droogdeppen en inkerven.",
+      "story": "Indirect met deflector op ~140°C, deksel dicht, niet keren, 2-3 uur voor een stuk van een kilo. Wil je krokant zwoerd, dan geven de meesten 'm op het eind een korte hete fase (zwoerd boven) of halen 'm onder de grill binnen."
+    },
+    {
+      "id": "chicken_wings",
+      "name": "Kippenvleugels",
+      "emoji": "🍗",
+      "category": "Gevogelte",
+      "method": "indirect",
+      "domeTempC": 200,
+      "coreTempC": 88,
+      "flipIntervalMin": 8,
+      "estimate": {
+        "type": "thickness",
+        "baseMin": 20,
+        "minPerCm": 3
+      },
+      "frozenFactor": 1.6,
+      "restMin": 3,
+      "temperMin": 15,
+      "tips": "Vleugels zijn pas echt lekker bij 85-90°C kern — dan is het vet uitgesmolten en het vel niet rubberig.",
+      "story": "De meesten doen vleugels indirect met deflector op ~200°C, deksel dicht, 25-35 min en af en toe keren. De laatste paar minuten direct boven de kolen (of aflakken met saus) voor een krokant, plakkerig velletje."
+    },
+    {
+      "id": "skewers",
+      "name": "Spiesen / saté",
+      "emoji": "🍢",
+      "category": "Gevogelte",
+      "method": "direct",
+      "domeTempC": 200,
+      "coreTempC": 74,
+      "flipIntervalMin": 2,
+      "estimate": {
+        "type": "thickness",
+        "baseMin": 4,
+        "minPerCm": 2
+      },
+      "frozenFactor": 1.5,
+      "restMin": 2,
+      "temperMin": 15,
+      "tips": "Kip altijd 74°C kern; varkensspies mag 63-65°C. Houten stokjes 30 min voorweken tegen verbranden.",
+      "story": "Direct op matig-heet vuur (~200°C) met de deksel meestal open en vaak keren — om de 1-2 min. Zoete marinade (saté/ketjap) verbrandt snel: bij aanbranden even naar de rand of het vuur iets lager."
+    },
+    {
+      "id": "gamba",
+      "name": "Gamba's / garnalen",
+      "emoji": "🦐",
+      "category": "Vis",
+      "method": "direct",
+      "domeTempC": 220,
+      "coreTempC": null,
+      "flipIntervalMin": 2,
+      "estimate": {
+        "type": "thickness",
+        "baseMin": 3,
+        "minPerCm": 1
+      },
+      "frozenFactor": 1.5,
+      "restMin": 0,
+      "temperMin": 10,
+      "tips": "Klaar zodra ze ondoorzichtig/roze zijn en C-vormig krullen. Een O-vorm = te gaar.",
+      "story": "Heel kort en heet: direct op ~220°C, 1-2 min per kant, één keer keren. Aan spiesen of in een grillmandje vallen ze niet door het rooster. In de schaal blijven ze het sappigst."
+    },
+    {
+      "id": "whole_fish",
+      "name": "Hele vis (dorade/zeebaars)",
+      "emoji": "🐠",
+      "category": "Vis",
+      "method": "direct",
+      "domeTempC": 180,
+      "coreTempC": 60,
+      "flipIntervalMin": 6,
+      "estimate": {
+        "type": "thickness",
+        "baseMin": 8,
+        "minPerCm": 3
+      },
+      "frozenFactor": 1.6,
+      "restMin": 3,
+      "temperMin": 15,
+      "tips": "Vel goed droogdeppen en oliën tegen plakken. Gaar bij ~60°C of als de rugvin er zó uit trekt.",
+      "story": "Een visklem is dé kamado-truc: direct op ~180°C, deksel dicht, één keer voorzichtig keren halverwege. Zonder klem: pas keren als het vel vanzelf loslaat van het rooster, anders scheurt 'ie."
+    },
+    {
+      "id": "corn",
+      "name": "Maiskolf",
+      "emoji": "🌽",
+      "category": "Groente",
+      "method": "direct",
+      "domeTempC": 200,
+      "coreTempC": null,
+      "flipIntervalMin": 3,
+      "estimate": {
+        "type": "thickness",
+        "baseMin": 15,
+        "minPerCm": 0
+      },
+      "frozenFactor": 1.3,
+      "restMin": 0,
+      "temperMin": 0,
+      "tips": "Klaar als de korrels felgeel zijn en hier en daar geblakerd. Afmaken met kruidenboter en zout.",
+      "story": "Direct op ~200°C, deksel dicht en om de paar minuten een kwartslag draaien, ~15-20 min totaal. In de schil blijft 'ie sappiger (stoomt); los op het rooster krijg je meer rook en geblakerde randjes."
     }
   ]
 }
