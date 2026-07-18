@@ -7,6 +7,8 @@ import {
   resolveTargetCoreForInput,
   searDomeTarget,
   SEAR_LEAD_C,
+  sanitizeMeat,
+  BUILTIN_MEATS,
   computeMeats,
   setMeatCustomization,
   upsertMeat,
@@ -109,7 +111,29 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       const meatRaw = await getSetting('meatCustom');
       if (meatRaw) {
         try {
-          const c = JSON.parse(meatRaw) as MeatCustomization;
+          let c = JSON.parse(meatRaw) as MeatCustomization;
+          // One-time cleanup (v1): drop AI-added items that duplicate a
+          // built-in cut (e.g. an old "houthakkersteak" with a bad estimate)
+          // and clamp implausible numbers on the remaining custom items.
+          // Items whose name merely CONTAINS a built-in name (e.g.
+          // "Diepvries hamburger") are kept — only real duplicates go.
+          const cleaned = await getSetting('meatCleanup1');
+          if (!cleaned) {
+            const norm = (s: string) =>
+              s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').trim();
+            const builtinNames = BUILTIN_MEATS.map((b) => norm(b.name));
+            c = {
+              ...c,
+              added: c.added
+                .filter((m) => {
+                  const n = norm(m.name);
+                  return !builtinNames.some((b) => b === n || b.includes(n));
+                })
+                .map(sanitizeMeat),
+            };
+            await setSetting('meatCustom', JSON.stringify(c));
+            await setSetting('meatCleanup1', '1');
+          }
           meatCustomRef.current = c;
           setMeatCustomization(c);
           setMeats(computeMeats(c));

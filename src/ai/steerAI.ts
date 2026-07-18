@@ -11,7 +11,7 @@
  * On any error (e.g. Gemini 429) we fall through to the next available
  * provider. Keys are user-supplied in Settings and stored locally.
  */
-import { slugMeatId } from '../logic/cook';
+import { slugMeatId, sanitizeMeat } from '../logic/cook';
 import type { CookMethod, Meat } from '../logic/types';
 
 export interface AIKeys {
@@ -126,7 +126,7 @@ function buildDiscoveredMeat(name: string, n: Record<string, unknown>): Meat {
     ? (n.method as CookMethod)
     : 'indirect';
   const estimateType = n.estimateType === 'weight' ? 'weight' : 'thickness';
-  return {
+  return sanitizeMeat({
     id: slugMeatId(name),
     name,
     emoji: (typeof n.emoji === 'string' && n.emoji) || '🍖',
@@ -145,7 +145,7 @@ function buildDiscoveredMeat(name: string, n: Record<string, unknown>): Meat {
     restMin: toNum(n.restMin, 5),
     temperMin: n.temperMin == null ? 30 : toNum(n.temperMin, 30),
     tips: (typeof n.tips === 'string' && n.tips) || '',
-  };
+  });
 }
 
 /**

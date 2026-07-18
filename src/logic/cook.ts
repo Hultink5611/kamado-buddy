@@ -71,6 +71,36 @@ export function removeMeat(c: MeatCustomization, id: string): MeatCustomization 
   return { ...c, added: c.added.filter((m) => m.id !== id) };
 }
 
+/**
+ * Clamp AI-proposed meat numbers into plausible BBQ ranges, so a hallucinated
+ * estimate (e.g. 40 min for a thin steak) can never reach the database.
+ * Direct thin cuts: 8-15 min total; indirect gets more room; low & slow
+ * (weight-based) keeps its long times.
+ */
+export function sanitizeMeat(m: Meat): Meat {
+  const est = { ...m.estimate };
+  if (est.type === 'thickness') {
+    const maxBase = m.method === 'direct' ? 15 : 45;
+    const maxPerCm = m.method === 'direct' ? 6 : 12;
+    est.baseMin = clamp(est.baseMin, 2, maxBase);
+    est.minPerCm = est.minPerCm == null ? undefined : clamp(est.minPerCm, 1, maxPerCm);
+  } else {
+    est.baseMin = clamp(est.baseMin, 5, 300);
+    est.minPerKg = est.minPerKg == null ? undefined : clamp(est.minPerKg, 15, 240);
+  }
+  return {
+    ...m,
+    domeTempC: clamp(m.domeTempC, 90, 300),
+    searDomeTempC: m.searDomeTempC == null ? undefined : clamp(m.searDomeTempC, 180, 350),
+    coreTempC: m.coreTempC == null ? null : clamp(m.coreTempC, 40, 96),
+    flipIntervalMin: m.flipIntervalMin == null ? null : clamp(m.flipIntervalMin, 1, 15),
+    frozenFactor: clamp(m.frozenFactor, 1, 2.5),
+    restMin: clamp(m.restMin, 0, 60),
+    temperMin: m.temperMin == null ? undefined : clamp(m.temperMin, 0, 90),
+    estimate: est,
+  };
+}
+
 /** Make a URL-safe, unique-ish id from a name (for user/AI-added meats). */
 export function slugMeatId(name: string): string {
   const base = name
