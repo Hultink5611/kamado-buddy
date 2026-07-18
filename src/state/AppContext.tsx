@@ -3,7 +3,8 @@ import { useInkbird } from '../ble/useInkbird';
 import { getSetting, setSetting, getLearned, saveCook, saveLearned } from '../storage/db';
 import {
   getMeat,
-  resolveTargetCore,
+  resolveTargetDome,
+  resolveTargetCoreForInput,
   computeMeats,
   setMeatCustomization,
   upsertMeat,
@@ -179,8 +180,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       endedAt: Date.now(),
       input: ac.input,
       meatName: meat?.name ?? 'Onbekend',
-      targetCoreC: meat ? resolveTargetCore(meat, ac.input.doneness) : null,
-      targetDomeC: meat?.domeTempC ?? 0,
+      targetCoreC: meat ? resolveTargetCoreForInput(meat, ac.input) : null,
+      targetDomeC: meat ? resolveTargetDome(meat, ac.input) : 0,
       ambientChannel: ac.ambientCh,
       meatChannel: ac.meatCh,
       samples: ac.samples,
@@ -211,8 +212,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       if (!ac) return;
       const meat = getMeat(ac.input.meatId);
       if (!meat) return;
-      const targetDomeC = meat.domeTempC;
-      const targetCoreC = resolveTargetCore(meat, ac.input.doneness);
+      const targetDomeC = resolveTargetDome(meat, ac.input);
+      const targetCoreC = resolveTargetCoreForInput(meat, ac.input);
       const currentAmbient =
         s.ink.channels[ac.ambientCh] ?? (ac.manualAmbient ? parseFloat(ac.manualAmbient) : null);
       const currentMeat =

@@ -4,7 +4,7 @@ import { useKeepAwake } from 'expo-keep-awake';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../App';
 import { useApp } from '../state/AppContext';
-import { getMeat, resolveTargetCore, estimateCookMinutes, predictMinutesRemaining } from '../logic/cook';
+import { getMeat, resolveTargetDome, resolveTargetCoreForInput, estimateCookMinutes, predictMinutesRemaining } from '../logic/cook';
 import { getSteeringAdvice } from '../logic/steering';
 import { getLearnedForTarget } from '../logic/learning';
 import { cancelTemperReminder } from '../logic/notifications';
@@ -22,8 +22,8 @@ export default function CookScreen({ navigation }: Props) {
   const ac = activeCook;
 
   const meat = ac ? getMeat(ac.input.meatId) : undefined;
-  const targetCoreC = meat && ac ? resolveTargetCore(meat, ac.input.doneness) : null;
-  const targetDomeC = meat?.domeTempC ?? 0;
+  const targetCoreC = meat && ac ? resolveTargetCoreForInput(meat, ac.input) : null;
+  const targetDomeC = meat && ac ? resolveTargetDome(meat, ac.input) : 0;
   const samples = ac?.samples ?? [];
 
   const currentAmbient = ac
