@@ -27,6 +27,7 @@ export default function NewCookScreen({ navigation }: Props) {
   const [marinadeName, setMarinadeName] = useState<string | undefined>();
   const [domeOverride, setDomeOverride] = useState('');
   const [coreOverride, setCoreOverride] = useState('');
+  const [searFinish, setSearFinish] = useState(false);
 
   const meat = meatId ? getMeat(meatId) : undefined;
   const useWeight = meat?.estimate.type === 'weight';
@@ -47,6 +48,7 @@ export default function NewCookScreen({ navigation }: Props) {
     setMarinadeName(undefined);
     setDomeOverride('');
     setCoreOverride('');
+    setSearFinish(false);
   }, [meatId]);
 
   // Live "plan": estimated total minutes, accounting for a lower slow-cook temp.
@@ -109,6 +111,7 @@ export default function NewCookScreen({ navigation }: Props) {
       marinadeName,
       domeTempOverrideC: domeOverrideC,
       coreTempOverrideC: coreOverrideC,
+      searFinish,
     });
     navigation.replace('Cook');
   };
@@ -198,10 +201,22 @@ export default function NewCookScreen({ navigation }: Props) {
               value={coreOverride}
               onChangeText={setCoreOverride}
             />
-            <Text style={styles.hintSmall}>
-              📋 Plan: BBQ {effDome}°C{targetCore != null ? ` · kern-doel ${targetCore}°C` : ' · op gevoel'} · ± {estMin != null ? fmtDur(estMin) : '–'}.
-              {domeOverrideC != null && meat.domeTempC != null && domeOverrideC < meat.domeTempC ? ' Lager dan standaard, dus langzamer en malser.' : ''}
-            </Text>
+            <View style={styles.inlineRow}>
+              <Text style={styles.label}>🔥 Afronden met dichtschroeien</Text>
+              <Switch value={searFinish} onValueChange={setSearFinish} trackColor={{ true: theme.colors.accent }} />
+            </View>
+            {searFinish ? (
+              <Text style={styles.hintSmall}>
+                📋 Plan (reverse sear):{'\n'}
+                1) Rustig garen op {effDome}°C{targetCore != null ? ` tot kern ~${Math.max(0, targetCore - 8)}°C` : ''}.{'\n'}
+                2) Seintje "nu dichtschroeien" → BBQ open, hard afschroeien tot {targetCore != null ? `${targetCore}°C` : 'op smaak'}.
+              </Text>
+            ) : (
+              <Text style={styles.hintSmall}>
+                📋 Plan: BBQ {effDome}°C{targetCore != null ? ` · kern-doel ${targetCore}°C` : ' · op gevoel'} · ± {estMin != null ? fmtDur(estMin) : '–'}.
+                {domeOverrideC != null && meat.domeTempC != null && domeOverrideC < meat.domeTempC ? ' Lager dan standaard, dus langzamer en malser.' : ''}
+              </Text>
+            )}
           </View>
 
           {meat.doneness && (

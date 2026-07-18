@@ -43,6 +43,8 @@ export interface CookInput {
   domeTempOverrideC?: number;
   /** User override of the target core temp (°C). */
   coreTempOverrideC?: number;
+  /** Finish the cook with a hard sear (reverse sear): gentle → sear at the end. */
+  searFinish?: boolean;
 }
 
 export interface TempSample {
@@ -88,6 +90,8 @@ export interface ActiveCook {
   grillOnAt: number | null;
   /** When the meat was last flipped (for the flip reminder + "late" counter). */
   lastFlipAt: number;
+  /** When the final sear phase started (reverse sear). Null until you sear. */
+  searStartedAt: number | null;
 }
 
 /**

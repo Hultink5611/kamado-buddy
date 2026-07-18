@@ -4,7 +4,7 @@ import { useKeepAwake } from 'expo-keep-awake';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../App';
 import { useApp } from '../state/AppContext';
-import { getMeat, resolveTargetDome, resolveTargetCoreForInput, estimateCookMinutes, predictMinutesRemaining } from '../logic/cook';
+import { getMeat, resolveTargetDome, resolveTargetCoreForInput, searDomeTarget, estimateCookMinutes, predictMinutesRemaining } from '../logic/cook';
 import { getSteeringAdvice } from '../logic/steering';
 import { getLearnedForTarget } from '../logic/learning';
 import { cancelTemperReminder } from '../logic/notifications';
@@ -23,7 +23,8 @@ export default function CookScreen({ navigation }: Props) {
 
   const meat = ac ? getMeat(ac.input.meatId) : undefined;
   const targetCoreC = meat && ac ? resolveTargetCoreForInput(meat, ac.input) : null;
-  const targetDomeC = meat && ac ? resolveTargetDome(meat, ac.input) : 0;
+  const searing = ac?.searStartedAt != null;
+  const targetDomeC = meat && ac ? (searing ? searDomeTarget(meat) : resolveTargetDome(meat, ac.input)) : 0;
   const samples = ac?.samples ?? [];
 
   const currentAmbient = ac
@@ -56,6 +57,10 @@ export default function CookScreen({ navigation }: Props) {
     const t = Date.now();
     updateActiveCook({ grillOnAt: t, lastFlipAt: t });
     void cancelTemperReminder();
+  }, [updateActiveCook]);
+
+  const startSear = useCallback(() => {
+    updateActiveCook({ searStartedAt: Date.now() });
   }, [updateActiveCook]);
 
   const finish = useCallback(async () => {
@@ -111,6 +116,27 @@ export default function CookScreen({ navigation }: Props) {
             <Text style={styles.grillBtnText}>Vlees ligt erop 🔥</Text>
           </Pressable>
         </View>
+      )}
+
+      {ac.input.searFinish && onGrill && (
+        searing ? (
+          <View style={styles.searBox}>
+            <Text style={styles.searH}>🔥 Searen — laatste fase</Text>
+            <Text style={styles.searSub}>
+              BBQ open, doel ~{targetDomeC}°C. Schroei kort per kant dicht tot de kern {targetCoreC != null ? `${targetCoreC}°C` : 'op smaak'} is. Blijf erbij — dit gaat snel.
+            </Text>
+          </View>
+        ) : (
+          <View style={styles.searBox}>
+            <Text style={styles.searH}>Reverse sear aan 🔥</Text>
+            <Text style={styles.searSub}>
+              Eerst rustig garen. Je krijgt een seintje zodra de kern bijna op doel is — of tik zelf zodra je gaat dichtschroeien.
+            </Text>
+            <Pressable style={styles.searBtn} onPress={startSear}>
+              <Text style={styles.searBtnText}>Ik ga dichtschroeien 🔥</Text>
+            </Pressable>
+          </View>
+        )
       )}
 
       {ink.state !== 'connected' && (
@@ -176,5 +202,10 @@ const styles = StyleSheet.create({
   grillPromptH: { color: theme.colors.text, fontSize: theme.font.h2, fontWeight: '700' },
   grillPromptSub: { color: theme.colors.textDim, fontSize: theme.font.small, lineHeight: 20 },
   grillBtn: { backgroundColor: theme.colors.accent, borderRadius: theme.radius, paddingVertical: 16, alignItems: 'center' },
+  searBox: { backgroundColor: theme.colors.card, borderRadius: theme.radius, padding: theme.space(4), gap: theme.space(2) },
+  searH: { color: theme.colors.text, fontSize: theme.font.h2, fontWeight: '700' },
+  searSub: { color: theme.colors.textDim, fontSize: theme.font.small, lineHeight: 20 },
+  searBtn: { backgroundColor: theme.colors.accent, borderRadius: theme.radius, paddingVertical: 14, alignItems: 'center', marginTop: theme.space(1) },
+  searBtnText: { color: '#0d0f12', fontSize: theme.font.body, fontWeight: '700' },
   grillBtnText: { color: '#0d0f12', fontSize: theme.font.h2, fontWeight: '700' },
 });
