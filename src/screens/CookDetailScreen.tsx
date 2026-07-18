@@ -4,9 +4,10 @@ import * as ImagePicker from 'expo-image-picker';
 import * as FileSystem from 'expo-file-system';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../App';
-import { getCook, deleteCook, saveCook } from '../storage/db';
-import type { Cook } from '../logic/types';
+import { getCook, deleteCook, saveCook, listMarinades } from '../storage/db';
+import type { Cook, Marinade } from '../logic/types';
 import LiveChart from '../components/LiveChart';
+import PickerSheet from '../components/PickerSheet';
 import { theme } from '../theme';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'CookDetail'>;
@@ -14,15 +15,25 @@ type Props = NativeStackScreenProps<RootStackParamList, 'CookDetail'>;
 export default function CookDetailScreen({ route, navigation }: Props) {
   const [cook, setCook] = useState<Cook | null>(null);
   const [notes, setNotes] = useState('');
+  const [marinades, setMarinades] = useState<Marinade[]>([]);
 
   useEffect(() => {
     getCook(route.params.cookId).then((c) => {
       setCook(c);
       setNotes(c?.notes ?? '');
     });
+    listMarinades().then(setMarinades);
   }, [route.params.cookId]);
 
   if (!cook) return <View style={styles.center}><Text style={styles.dim}>Laden…</Text></View>;
+
+  const cutMarinades = marinades.filter((m) => m.meatId === cook.input.meatId);
+  const setMarinade = async (id: string | undefined) => {
+    const m = marinades.find((x) => x.id === id);
+    const updated = { ...cook, input: { ...cook.input, marinadeId: id, marinadeName: m?.name } };
+    await saveCook(updated);
+    setCook(updated);
+  };
 
   // Save the note; keeps every other field (incl. the cook's date) intact.
   const saveNotes = async () => {
@@ -93,6 +104,22 @@ export default function CookDetailScreen({ route, navigation }: Props) {
       </View>
 
       {cook.input.frozen && <Text style={styles.dim}>❄️ Uit de diepvries gestart</Text>}
+
+      <View style={styles.notesBlock}>
+        <Text style={styles.photoH}>🧂 Marinade</Text>
+        {cutMarinades.length > 0 ? (
+          <PickerSheet
+            title={`Marinades voor ${cook.meatName}`}
+            options={cutMarinades.map((m) => ({ id: m.id, label: m.name || 'Naamloos', sub: m.rating != null ? `${m.rating}/10` : undefined, emoji: '🧂' }))}
+            value={cook.input.marinadeId}
+            placeholder="Geen marinade"
+            noneLabel="Geen marinade"
+            onSelect={setMarinade}
+          />
+        ) : (
+          <Text style={styles.dim}>{cook.input.marinadeName ? `🧂 ${cook.input.marinadeName}` : 'Nog geen marinades voor dit stuk — voeg ze toe in de Marinades-tab.'}</Text>
+        )}
+      </View>
 
       <View style={styles.notesBlock}>
         <Text style={styles.photoH}>📝 Opmerkingen</Text>
