@@ -28,12 +28,24 @@ import type { AIKeys } from '../ai/steerAI';
 import type { HAConfig } from '../ha/haPush';
 import type { ActiveCook, Cook, CookInput, LearnedSetting, Meat, TempSample } from '../logic/types';
 
+/** Per-type notification switches. All default on (current behaviour). */
+export interface NotifySettings {
+  enabled: boolean; // master switch
+  core: boolean; // kerntemp bereikt
+  flip: boolean; // draaien
+  ambient: boolean; // BBQ buiten bereik
+  sear: boolean; // tijd om te searen
+  temper: boolean; // "leg 'm erop"
+  status: boolean; // aanhoudende status-melding
+}
+
 interface Settings {
   ambientChannel: number;
   meatChannel: number;
   alarmMarginC: number;
   keys: AIKeys;
   ha: HAConfig;
+  notify: NotifySettings;
 }
 
 interface AppValue {
@@ -53,12 +65,23 @@ interface AppValue {
   deleteMeat: (id: string) => Promise<void>;
 }
 
+export const DEFAULT_NOTIFY: NotifySettings = {
+  enabled: true,
+  core: true,
+  flip: true,
+  ambient: true,
+  sear: true,
+  temper: true,
+  status: true,
+};
+
 const DEFAULTS: Settings = {
   ambientChannel: 0,
   meatChannel: 1,
   alarmMarginC: 15,
   keys: {},
   ha: {},
+  notify: DEFAULT_NOTIFY,
 };
 
 const SAMPLE_MS = 5000;
@@ -77,7 +100,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     (async () => {
       const raw = await getSetting('settings');
-      if (raw) setSettings({ ...DEFAULTS, ...JSON.parse(raw) });
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        setSettings({ ...DEFAULTS, ...parsed, notify: { ...DEFAULT_NOTIFY, ...(parsed.notify ?? {}) } });
+      }
       setLearned(await getLearned());
       // Restore custom / edited / deleted meats.
       const meatRaw = await getSetting('meatCustom');
@@ -110,6 +136,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       ...patch,
       keys: { ...settings.keys, ...(patch.keys ?? {}) },
       ha: { ...settings.ha, ...(patch.ha ?? {}) },
+      notify: { ...settings.notify, ...(patch.notify ?? {}) },
     };
     setSettings(next);
     await setSetting('settings', JSON.stringify(next));
@@ -169,7 +196,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     });
     // "Meat can go on" reminder after the meat's temper time.
     const meat = getMeat(input.meatId);
-    void scheduleTemperReminder(meat?.name ?? 'Je vlees', meat?.temperMin ?? 0);
+    if (settings.notify.enabled && settings.notify.temper)
+      void scheduleTemperReminder(meat?.name ?? 'Je vlees', meat?.temperMin ?? 0);
   };
 
   const updateActiveCook = (patch: Partial<ActiveCook>) =>
@@ -237,12 +265,20 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       const advice = getSteeringAdvice(targetDomeC, currentAmbient, ac.samples, learnedSetting);
       alarmRef.current.appliedVent = { bottom: advice.suggestedBottom, top: advice.suggestedTop };
 
+      // Notification switches (Instellingen → Meldingen).
+      const n = s.settings.notify ?? DEFAULT_NOTIFY;
+      const notifyOn = (k: keyof NotifySettings) => n.enabled && n[k];
+
       // Ongoing status notification.
-      void showCookStatus(
-        `${meat.emoji} ${meat.name} · BBQ ${currentAmbient != null ? Math.round(currentAmbient) : '–'}° · kern ${
-          currentMeat != null ? Math.round(currentMeat) : '–'
-        }°`
-      );
+      if (notifyOn('status')) {
+        void showCookStatus(
+          `${meat.emoji} ${meat.name} · BBQ ${currentAmbient != null ? Math.round(currentAmbient) : '–'}° · kern ${
+            currentMeat != null ? Math.round(currentMeat) : '–'
+          }°`
+        );
+      } else {
+        void clearCookStatus();
+      }
 
       // Push to Home Assistant (thuishub dashboard).
       void pushToHA(s.settings.ha, {
@@ -267,10 +303,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         currentMeat >= targetCoreC - SEAR_LEAD_C
       ) {
         alarmRef.current.searPrompted = true;
-        void fireAlarm(
-          '🔥 Tijd om dicht te schroeien!',
-          `Kern zit op ${Math.round(currentMeat)}°C. Open de BBQ, stook op naar ~${searDomeTarget(meat)}°C en schroei kort dicht tot ${targetCoreC}°C. Tik op "Ik ga searen" in de app.`
-        );
+        if (notifyOn('sear'))
+          void fireAlarm(
+            '🔥 Tijd om dicht te schroeien!',
+            `Kern zit op ${Math.round(currentMeat)}°C. Open de BBQ, stook op naar ~${searDomeTarget(meat)}°C en schroei kort dicht tot ${targetCoreC}°C. Tik op "Ik ga searen" in de app.`
+          );
       }
 
       // Core-temp reached alarm.
@@ -281,10 +318,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         currentMeat >= targetCoreC
       ) {
         alarmRef.current.firedCore = true;
-        void fireAlarm(
-          '✅ Kerntemp bereikt!',
-          `${meat.name} zit op ${Math.round(currentMeat)}°C. Haal 'm eraf en laat rusten (${meat.restMin} min).`
-        );
+        if (notifyOn('core'))
+          void fireAlarm(
+            '✅ Kerntemp bereikt!',
+            `${meat.name} zit op ${Math.round(currentMeat)}°C. Haal 'm eraf en laat rusten (${meat.restMin} min).`
+          );
       }
 
       // Flip reminder — per meat (meat.flipIntervalMin). Fires once per cycle:
@@ -295,7 +333,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         const dueMs = meat.flipIntervalMin * 60_000;
         if (Date.now() - lastFlipAt >= dueMs && alarmRef.current.flipNotifiedAt !== lastFlipAt) {
           alarmRef.current.flipNotifiedAt = lastFlipAt;
-          void fireAlarm('🔄 Draaien!', `Tijd om ${meat.name} te draaien.`);
+          if (notifyOn('flip')) void fireAlarm('🔄 Draaien!', `Tijd om ${meat.name} te draaien.`);
         }
       }
 
@@ -308,10 +346,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         if (off && !alarmRef.current.ambientOut && quietForMs > 10 * 60_000) {
           alarmRef.current.ambientOut = true;
           alarmRef.current.lastAmbientAlarmAt = Date.now();
-          void fireAlarm(
-            '🌡️ BBQ buiten bereik',
-            `Omgeving ${Math.round(currentAmbient)}°C (doel ${targetDomeC}°C). ${advice.detail}`
-          );
+          if (notifyOn('ambient'))
+            void fireAlarm(
+              '🌡️ BBQ buiten bereik',
+              `Omgeving ${Math.round(currentAmbient)}°C (doel ${targetDomeC}°C). ${advice.detail}`
+            );
         } else if (!off) {
           alarmRef.current.ambientOut = false;
         }

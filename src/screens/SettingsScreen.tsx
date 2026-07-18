@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TextInput, Pressable, Alert, Share } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TextInput, Pressable, Alert, Share, Switch } from 'react-native';
 import { useApp } from '../state/AppContext';
+import type { NotifySettings } from '../state/AppContext';
 import { exportAll } from '../storage/db';
 import { testHA } from '../ha/haPush';
 import { theme } from '../theme';
@@ -38,6 +39,10 @@ export default function SettingsScreen() {
     await Share.share({ title: 'kamado-buddy-export.json', message: json });
   };
 
+  const notify = settings.notify;
+  const setNotify = (patch: Partial<NotifySettings>) =>
+    updateSettings({ notify: { ...notify, ...patch } });
+
   return (
     <ScrollView contentContainerStyle={styles.content}>
       <Section title="AI (optioneel)">
@@ -54,8 +59,23 @@ export default function SettingsScreen() {
         <Text style={styles.hint}>Sleutels: platform.openai.com/api-keys (OpenAI) · aistudio.google.com/apikey (Gemini) · console.groq.com/keys (Groq)</Text>
       </Section>
 
+      <Section title="Meldingen">
+        <NotifyRow label="Meldingen aan" hint="Hoofdschakelaar — uit = stilte, geen enkele melding." value={notify.enabled} onChange={(v) => setNotify({ enabled: v })} />
+        {notify.enabled && (
+          <>
+            <NotifyRow label="🥩 Kerntemp bereikt" value={notify.core} onChange={(v) => setNotify({ core: v })} />
+            <NotifyRow label="🔄 Draaien" value={notify.flip} onChange={(v) => setNotify({ flip: v })} />
+            <NotifyRow label="🌡️ BBQ buiten bereik" value={notify.ambient} onChange={(v) => setNotify({ ambient: v })} />
+            <NotifyRow label="🔥 Tijd om te searen" value={notify.sear} onChange={(v) => setNotify({ sear: v })} />
+            <NotifyRow label="🥩 Leg 'm erop (temperen)" value={notify.temper} onChange={(v) => setNotify({ temper: v })} />
+            <NotifyRow label="📌 Vaste 'cook actief'-melding" hint="Stille, aanhoudende melding in je meldingenlijst tijdens een cook." value={notify.status} onChange={(v) => setNotify({ status: v })} />
+          </>
+        )}
+      </Section>
+
       <Section title="Alarmen">
         <Text style={styles.label}>Marge kamado-alarm (± °C)</Text>
+        <Text style={styles.hint}>Hoe ver de BBQ van 't doel mag afwijken vóór het "buiten bereik"-alarm. Hoger = minder meldingen.</Text>
         <TextInput
           style={styles.input}
           value={margin}
@@ -96,6 +116,18 @@ function Section({ title, children }: { title: string; children: React.ReactNode
   );
 }
 
+function NotifyRow({ label, hint, value, onChange }: { label: string; hint?: string; value: boolean; onChange: (v: boolean) => void }) {
+  return (
+    <View style={styles.notifyRow}>
+      <View style={styles.notifyText}>
+        <Text style={styles.label}>{label}</Text>
+        {hint ? <Text style={styles.hint}>{hint}</Text> : null}
+      </View>
+      <Switch value={value} onValueChange={onChange} trackColor={{ true: theme.colors.accent }} />
+    </View>
+  );
+}
+
 const styles = StyleSheet.create({
   content: { padding: theme.space(4), gap: theme.space(4) },
   section: { backgroundColor: theme.colors.card, borderRadius: theme.radius, padding: theme.space(4), gap: theme.space(2) },
@@ -108,4 +140,6 @@ const styles = StyleSheet.create({
   btnAlt: { backgroundColor: theme.colors.cardAlt },
   btnAltText: { color: theme.colors.text, fontWeight: '700' },
   version: { color: theme.colors.textDim, fontSize: theme.font.small, textAlign: 'center' },
+  notifyRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: theme.space(3), paddingVertical: 4 },
+  notifyText: { flex: 1, gap: 2 },
 });
