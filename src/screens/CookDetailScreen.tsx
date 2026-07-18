@@ -110,7 +110,7 @@ export default function CookDetailScreen({ route, navigation }: Props) {
         {cutMarinades.length > 0 ? (
           <PickerSheet
             title={`Marinades voor ${cook.meatName}`}
-            options={cutMarinades.map((m) => ({ id: m.id, label: m.name || 'Naamloos', sub: m.rating != null ? `${m.rating}/10` : undefined, emoji: '🧂' }))}
+            options={cutMarinades.map((m) => ({ id: m.id, label: m.name || 'Naamloos', sub: [m.amount, m.rating != null ? `${m.rating}/10` : null].filter(Boolean).join(' · ') || undefined, emoji: '🧂' }))}
             value={cook.input.marinadeId}
             placeholder="Geen marinade"
             noneLabel="Geen marinade"
