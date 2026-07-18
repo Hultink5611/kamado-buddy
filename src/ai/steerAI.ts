@@ -21,7 +21,7 @@ export interface AIKeys {
 }
 
 const OPENAI_URL = 'https://api.openai.com/v1/chat/completions';
-const OPENAI_MODEL = 'gpt-4o-mini'; // cheap, for text coaching
+const OPENAI_MODEL = 'gpt-4o'; // sterker tekstmodel voor coaching + marinades
 const OPENAI_VISION_MODEL = 'gpt-4o'; // sterker in vlees-/vissnit-herkenning
 const GEMINI_URL =
   'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent';
@@ -224,4 +224,49 @@ export async function identifyMeat(
   } catch {
     return { name: 'Onbekend', notes: raw.slice(0, 140) };
   }
+}
+
+export interface MarinadeSuggestion {
+  name: string;
+  ingredients: string;
+  method: string;
+}
+
+/** Let the AI invent a marinade for a given cut. Tries OpenAI → Gemini → Groq. */
+export async function suggestMarinade(keys: AIKeys, cut: string): Promise<MarinadeSuggestion> {
+  const prompt =
+    `Bedenk één lekkere, verrassende marinade voor "${cut}" op de kamado-BBQ. ` +
+    'Geef concrete ingrediënten met hoeveelheden en een korte methode inclusief marineertijd. ' +
+    'Antwoord ALLEEN als JSON: {"name":"korte pakkende naam","ingredients":"ingredient 1\\ningredient 2\\n...","method":"kort stappenplan + marineertijd"}';
+  const providers: Array<() => Promise<string>> = [];
+  if (keys.openaiKey) providers.push(() => callOpenAI(keys.openaiKey!, prompt));
+  if (keys.geminiKey) providers.push(() => callGemini(keys.geminiKey!, prompt));
+  if (keys.groqKey) providers.push(() => callGroq(keys.groqKey!, prompt));
+  if (providers.length === 0) throw new Error('Geen AI-sleutel ingesteld');
+
+  let raw = '';
+  let lastErr: unknown;
+  for (const run of providers) {
+    try {
+      raw = await run();
+      break;
+    } catch (e) {
+      lastErr = e;
+    }
+  }
+  if (!raw) throw lastErr instanceof Error ? lastErr : new Error('AI mislukt');
+  const match = raw.match(/\{[\s\S]*\}/);
+  if (match) {
+    try {
+      const p = JSON.parse(match[0]);
+      return {
+        name: p.name ?? `Marinade voor ${cut}`,
+        ingredients: p.ingredients ?? '',
+        method: p.method ?? '',
+      };
+    } catch {
+      /* fall through to raw */
+    }
+  }
+  return { name: `Marinade voor ${cut}`, ingredients: raw.trim(), method: '' };
 }

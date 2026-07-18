@@ -67,7 +67,7 @@ export default function CookScreen({ navigation }: Props) {
     return (
       <View style={styles.empty}>
         <Text style={styles.emptyText}>Geen actieve cook.</Text>
-        <Pressable style={styles.finish} onPress={() => navigation.replace('Home')}>
+        <Pressable style={styles.finish} onPress={() => navigation.replace('Tabs')}>
           <Text style={styles.finishText}>Naar start</Text>
         </Pressable>
       </View>

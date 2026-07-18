@@ -83,6 +83,25 @@ export interface ActiveCook {
   lastFlipAt: number;
 }
 
+/**
+ * A marinade you've discovered / created for a cut of meat — with an optional
+ * photo, a personal note and a rating (cijfer 1–10). Stored in the marinade
+ * library so you can build up a collection of favourites.
+ */
+export interface Marinade {
+  id: string;
+  name: string;
+  /** Which cut it's for, free text (e.g. "Short rib"). */
+  forMeat?: string;
+  ingredients: string;
+  method?: string;
+  note?: string;
+  /** Rating out of 10. */
+  rating?: number;
+  photoUri?: string;
+  createdAt: number;
+}
+
 /** A stable vent setting learned for a target temperature band. */
 export interface LearnedSetting {
   bandMaxC: number;
