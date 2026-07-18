@@ -19,6 +19,11 @@ export interface Meat {
   /** Minutes to let the meat come to room temperature before it goes on. */
   temperMin?: number;
   tips: string;
+  /**
+   * "Zo doen de meesten het" — a short story of common kamado practice:
+   * lid open/closed, with/without deflector, temp range, how often to flip.
+   */
+  story?: string;
 }
 
 export interface VentBand {

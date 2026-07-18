@@ -25,7 +25,8 @@
       "frozenFactor": 1.5,
       "restMin": 2,
       "tips": "Gehakt altijd door en door (71°C). Niet platdrukken. Kaas in de laatste 2 min, deksel dicht. Reken ~4-5 min per kant direct.",
-      "temperMin": 15
+      "temperMin": 15,
+      "story": "De meesten grillen burgers direct zonder deflector, deksel dicht rond 200°C, en keren 1-2x (niet vaker, dan valt 'ie uit elkaar). Niet aandrukken met de spatel — daar pers je de sappen uit. Bij steekvlammen even naar de rand schuiven."
     },
     {
       "id": "steak",
@@ -51,7 +52,8 @@
       "frozenFactor": 1.6,
       "restMin": 5,
       "tips": "Heet en direct dichtschroeien, ~2-3 min per kant. Dik stuk (>4 cm)? Overweeg reverse sear: eerst indirect naar 46°C, dan kort heet afgrillen.",
-      "temperMin": 30
+      "temperMin": 30,
+      "story": "Klassiek op de kamado: direct zonder deflector, rooster laag boven gloeiende kolen op 250°C+, deksel open tijdens het schroeien. 2-3 min per kant, 1-2x keren; sommigen keren elke minuut voor een egale korst."
     },
     {
       "id": "steak_reverse",
@@ -77,7 +79,8 @@
       "restMin": 8,
       "tips": "Indirect tot ~6°C onder doel, dan rooster op de hete kolen en 45-60 sec per kant afschroeien.",
       "temperMin": 45,
-      "typicalWeightKg": 0.5
+      "typicalWeightKg": 0.5,
+      "story": "Dé kamado-methode voor dikke steaks: eerst mét deflector op ~130°C met de deksel dicht tot ~6°C onder het doel, dan deflector eruit en 45-60 sec per kant hard afschroeien boven de open kolen."
     },
     {
       "id": "chicken_breast",
@@ -96,7 +99,8 @@
       "frozenFactor": 1.6,
       "restMin": 3,
       "tips": "Kip altijd 74°C. Indirect afmaken als de buitenkant te snel kleurt. Dikke filet? Vlinder 'm open voor gelijkmatig garen.",
-      "temperMin": 20
+      "temperMin": 20,
+      "story": "Meestal direct op matig vuur (~190°C) met de deksel dicht, om de 4 min keren. Kleurt de buitenkant te snel, dan schuiven veel mensen 'm naar de indirecte kant (of deflector er half in) om droog worden te voorkomen."
     },
     {
       "id": "chicken_thigh",
@@ -115,7 +119,8 @@
       "frozenFactor": 1.6,
       "restMin": 3,
       "tips": "Dijen mogen hoger (75-80°C), worden dan botermals. Met bot duurt 't langer dan zonder.",
-      "temperMin": 20
+      "temperMin": 20,
+      "story": "Dijen zijn vergevingsgezind: direct rond 190°C, deksel dicht, regelmatig keren en de velkant als laatste knapperig grillen. Met deflector op ~180°C kan ook — duurt iets langer maar wordt extra mals."
     },
     {
       "id": "whole_chicken",
@@ -135,7 +140,8 @@
       "restMin": 10,
       "tips": "Indirect (deflector). Meet in de dikste bil, niet tegen het bot. Vel knapperig? Laatste 10 min klep verder open.",
       "temperMin": 30,
-      "typicalWeightKg": 1.5
+      "typicalWeightKg": 1.5,
+      "story": "Vrijwel altijd indirect mét deflector, deksel dicht op 180°C en niet keren. Een kippenstandaard (beer can) is populair op de kamado. Vel niet knapperig genoeg? Laatste 10 min de kleppen verder open."
     },
     {
       "id": "pork_chop",
@@ -154,7 +160,8 @@
       "frozenFactor": 1.5,
       "restMin": 5,
       "tips": "63°C + 3 min rust = sappig en veilig. Niet naar 75°C, dan wordt 'ie droog. Reken ~4-6 min per kant.",
-      "temperMin": 30
+      "temperMin": 30,
+      "story": "Direct zonder deflector rond 200°C, deksel dicht, om de 3 min keren. Dikke karbonades met bot doen velen als mini-reverse-sear: eerst even indirect, dan kort afschroeien."
     },
     {
       "id": "pork_neck_steak",
@@ -173,7 +180,8 @@
       "frozenFactor": 1.5,
       "restMin": 3,
       "tips": "Dun (~1,5-2 cm) en meestal gemarineerd: matig vuur, anders verbrandt de marinade. Reken 3-4 min per kant. Druipvet geeft steekvlammen → indirect of grillplaat is veiliger. Kern 63-65°C, licht rosé mag bij nek.",
-      "temperMin": 20
+      "temperMin": 20,
+      "story": "Vanwege de marinade en het druipende vet grillen de meesten deze op matig direct vuur (180-200°C) met de deksel dicht, 2x keren. Veel steekvlammen? Deflector erin of naar de rand — de marinade verbrandt anders."
     },
     {
       "id": "pulled_pork",
@@ -193,7 +201,8 @@
       "restMin": 30,
       "tips": "Low & slow met deflector. Reken een 'stall' rond 70°C in — kan uren duren. Klaar bij 92-95°C, dan valt 'ie uit elkaar.",
       "temperMin": 45,
-      "typicalWeightKg": 2.5
+      "typicalWeightKg": 2.5,
+      "story": "Het klassieke low & slow werk: deflector erin, deksel dicht op 110-130°C, 8+ uur en niet keren. De meesten wikkelen in folie of slagerspapier zodra de stall (~70°C) toeslaat en laten 'm daarna lang rusten."
     },
     {
       "id": "spare_ribs",
@@ -213,7 +222,8 @@
       "restMin": 10,
       "tips": "3-2-1 methode werkt goed. Gaar als het vlees ~1 cm van het bot terugtrekt en een tandenstoker soepel ingaat.",
       "temperMin": 45,
-      "typicalWeightKg": 1.3
+      "typicalWeightKg": 1.3,
+      "story": "Altijd indirect met deflector op ~120°C, deksel dicht, botkant naar beneden en niet keren. De 3-2-1-methode (3 u rook, 2 u in folie, 1 u aflakken met saus) is veruit de meest gebruikte aanpak."
     },
     {
       "id": "brisket",
@@ -233,7 +243,8 @@
       "restMin": 60,
       "tips": "Geduld. Wikkel in slagerspapier na de stall (~68°C) om door te duwen. Klaar bij 93-96°C als het als boter voelt.",
       "temperMin": 60,
-      "typicalWeightKg": 4.0
+      "typicalWeightKg": 4,
+      "story": "Indirect met deflector op 110°C, deksel dicht en niet keren; over vetkant boven of onder zijn de kampen verdeeld. Vrijwel iedereen wikkelt na de stall in slagerspapier en laat 'm daarna 1+ uur rusten in een koelbox."
     },
     {
       "id": "sausage",
@@ -252,7 +263,8 @@
       "frozenFactor": 1.5,
       "restMin": 2,
       "tips": "Rustig direct (~12-15 min totaal), veel draaien zodat 'ie niet barst. Niet insnijden.",
-      "temperMin": 15
+      "temperMin": 15,
+      "story": "Rustig direct op ~180°C met de deksel dicht en vaak keren, zodat het vel niet barst. Verse (rauwe) worst leggen veel mensen eerst even indirect en ronden dan af boven de kolen."
     },
     {
       "id": "salmon",
@@ -276,7 +288,8 @@
       "frozenFactor": 1.6,
       "restMin": 2,
       "tips": "Op het vel, niet draaien (~12-15 min totaal). Klaar bij 50-54°C voor sappig. Vel plakt? Rooster goed heet en licht oliën.",
-      "temperMin": 15
+      "temperMin": 15,
+      "story": "Meestal op het vel op de koelere kant of indirect rond 180°C, deksel dicht en niet keren — het vel beschermt de vis. Op een geweekt cederhouten plankje is dé kamado-klassieker voor zalm."
     },
     {
       "id": "lamb_chop",
@@ -300,7 +313,8 @@
       "frozenFactor": 1.5,
       "restMin": 5,
       "tips": "Heet en snel. Vetranden kort direct uitbakken voor smaak.",
-      "temperMin": 30
+      "temperMin": 30,
+      "story": "Heet en snel: direct boven de kolen op ~230°C, deksel open, ±2 min per kant en 1-2x keren. De vetrand eerst even rechtop op het rooster uitbakken is een bekende truc voor extra smaak."
     },
     {
       "id": "veggies",
@@ -319,7 +333,8 @@
       "frozenFactor": 1.3,
       "restMin": 0,
       "tips": "Op gevoel/kleur, geen kerntemp. Licht oliën tegen plakken. Zacht & sappig: in een foliebakje; rooksmaak & randjes: los op het rooster of aan spiesen.",
-      "temperMin": 0
+      "temperMin": 0,
+      "story": "Direct op het rooster of in een groentemand rond 200°C, deksel dicht en regelmatig husselen/keren. Zachte of gemarineerde groente doen de meesten in een foliebakje op de indirecte kant."
     }
   ]
 }

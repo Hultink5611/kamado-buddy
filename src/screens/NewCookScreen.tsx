@@ -166,6 +166,12 @@ export default function NewCookScreen({ navigation }: Props) {
             </View>
           </View>
           <Text style={styles.tips}>{meat.tips}</Text>
+          {meat.story ? (
+            <View style={styles.storyBox}>
+              <Text style={styles.storyH}>📖 Zo doen de meesten het</Text>
+              <Text style={styles.storyText}>{meat.story}</Text>
+            </View>
+          ) : null}
 
           <View style={styles.slowBox}>
             <Text style={styles.label}>🐢 BBQ-temperatuur zelf kiezen (slow cook)</Text>
@@ -300,6 +306,9 @@ const styles = StyleSheet.create({
   goalValOverride: { color: theme.colors.accent },
   slowBox: { backgroundColor: theme.colors.cardAlt, borderRadius: 12, padding: theme.space(3), gap: theme.space(2) },
   tips: { color: theme.colors.textDim, fontSize: theme.font.small, lineHeight: 20 },
+  storyBox: { backgroundColor: theme.colors.cardAlt, borderRadius: 12, padding: theme.space(3), gap: 4 },
+  storyH: { color: theme.colors.text, fontSize: theme.font.small, fontWeight: '700' },
+  storyText: { color: theme.colors.textDim, fontSize: theme.font.small, lineHeight: 20, fontStyle: 'italic' },
   hintSmall: { color: theme.colors.textDim, fontSize: theme.font.small },
   label: { color: theme.colors.text, fontSize: theme.font.small, fontWeight: '600' },
   row: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
