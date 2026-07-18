@@ -5,7 +5,7 @@ import * as ImagePicker from 'expo-image-picker';
 import * as FileSystem from 'expo-file-system';
 import { useApp } from '../state/AppContext';
 import { listMarinades, saveMarinade, deleteMarinade } from '../storage/db';
-import { suggestMarinade, scaleMarinade, searchMarinade } from '../ai/steerAI';
+import { suggestMarinade, scaleMarinade, searchMarinade, enrichMarinade } from '../ai/steerAI';
 import type { Marinade, Meat } from '../logic/types';
 import { theme } from '../theme';
 
@@ -316,6 +316,42 @@ function MarinadeForm({
   const [photoUri, setPhotoUri] = useState<string | undefined>(draft.photoUri);
   const [target, setTarget] = useState('');
   const [scaling, setScaling] = useState(false);
+  const [enriching, setEnriching] = useState(false);
+
+  // Placeholder voor "Voor hoeveel": gebruik het gekozen stuk, nooit hardcoded "hamburgers".
+  const cutName = (meats.find((m) => m.id === meatId)?.name || forMeat).trim();
+  const amountPlaceholder = cutName ? `bijv. 4 ${cutName.toLowerCase()} (~500 g)` : 'bijv. 4 stuks (~600 g)';
+
+  const hasKeys = () => {
+    if (settings.keys.openaiKey || settings.keys.geminiKey || settings.keys.groqKey) return true;
+    Alert.alert('Geen AI-sleutel', 'Stel een AI-sleutel in bij Instellingen.');
+    return false;
+  };
+
+  // AI vult "voor hoeveel" + bereidingswijze aan, zonder de ingrediënten te wijzigen.
+  const enrich = async () => {
+    if (!hasKeys()) return;
+    if (!ingredients.trim()) {
+      Alert.alert('Geen ingrediënten', 'Voeg eerst ingrediënten toe.');
+      return;
+    }
+    setEnriching(true);
+    try {
+      const r = await enrichMarinade(settings.keys, {
+        name: name || 'marinade',
+        forMeat: forMeat || undefined,
+        amount: amount || undefined,
+        ingredients,
+        method: method || undefined,
+      });
+      setAmount(r.amount);
+      if (r.method) setMethod(r.method);
+    } catch (e) {
+      Alert.alert('Aanvullen mislukt', String(e));
+    } finally {
+      setEnriching(false);
+    }
+  };
 
   // AI-herberekening: vloeistoffen ~evenredig, kruiden sub-lineair.
   const rescale = async () => {
@@ -412,9 +448,14 @@ function MarinadeForm({
           onSelect={(m) => { setMeatId(m?.id); if (m) setForMeat(m.name); }}
         />
       </Field>
-      <Field label="Voor hoeveel"><TextInput style={styles.input} value={amount} onChangeText={setAmount} placeholder="bijv. 4 hamburgers (~600 g)" placeholderTextColor={theme.colors.textDim} /></Field>
+      <Field label="Voor hoeveel">
+        <TextInput style={styles.input} value={amount} onChangeText={setAmount} placeholder={amountPlaceholder} placeholderTextColor={theme.colors.textDim} />
+        <Pressable style={styles.enrichBtn} onPress={enrich} disabled={enriching}>
+          {enriching ? <ActivityIndicator color={theme.colors.accent} /> : <Text style={styles.enrichText}>✨ Laat AI 'voor hoeveel' + bereiding invullen</Text>}
+        </Pressable>
+      </Field>
       <Field label="Ingrediënten"><TextInput style={[styles.input, styles.multi]} value={ingredients} onChangeText={setIngredients} multiline placeholder="Eén per regel, met hoeveelheden" placeholderTextColor={theme.colors.textDim} /></Field>
-      <Field label="Methode / marineertijd"><TextInput style={[styles.input, styles.multi]} value={method} onChangeText={setMethod} multiline placeholder="Hoe aanmaken + hoe lang marineren" placeholderTextColor={theme.colors.textDim} /></Field>
+      <Field label="Methode / marineertijd (incl. hoe grillen)"><TextInput style={[styles.input, styles.multi]} value={method} onChangeText={setMethod} multiline placeholder="Aanmaken + marineertijd + hoe grillen: folie, rooster, grillplaat of spies" placeholderTextColor={theme.colors.textDim} /></Field>
 
       <Field label="🔢 Herbereken naar ander aantal (AI)">
         <View style={styles.aiRow}>
@@ -483,6 +524,8 @@ const styles = StyleSheet.create({
   aiBtnAlt: { backgroundColor: theme.colors.cardAlt },
   aiBtnAltText: { color: theme.colors.text, fontWeight: '700' },
   pickRow: { flexDirection: 'row', gap: 8 },
+  enrichBtn: { marginTop: 6, alignSelf: 'flex-start', paddingVertical: 4 },
+  enrichText: { color: theme.colors.accent, fontWeight: '600', fontSize: theme.font.small },
   listHead: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 4 },
   listTitle: { color: theme.colors.text, fontSize: theme.font.h2, fontWeight: '700' },
   addLink: { color: theme.colors.accent, fontSize: theme.font.small, fontWeight: '600' },
