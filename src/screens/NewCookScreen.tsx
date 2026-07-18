@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, Pressable, ScrollView, TextInput, Switch, Image, ActivityIndicator, Alert } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -6,6 +6,9 @@ import type { RootStackParamList } from '../App';
 import { getMeat, resolveTargetCore } from '../logic/cook';
 import { identifyMeat } from '../ai/steerAI';
 import { useApp } from '../state/AppContext';
+import { listMarinades } from '../storage/db';
+import type { Marinade } from '../logic/types';
+import PickerSheet from '../components/PickerSheet';
 import { theme } from '../theme';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'NewCook'>;
@@ -19,10 +22,23 @@ export default function NewCookScreen({ navigation }: Props) {
   const [thickness, setThickness] = useState('');
   const [photoUri, setPhotoUri] = useState<string | undefined>();
   const [aiBusy, setAiBusy] = useState(false);
+  const [marinades, setMarinades] = useState<Marinade[]>([]);
+  const [marinadeId, setMarinadeId] = useState<string | undefined>();
+  const [marinadeName, setMarinadeName] = useState<string | undefined>();
 
   const meat = meatId ? getMeat(meatId) : undefined;
   const useWeight = meat?.estimate.type === 'weight';
   const targetCore = meat ? resolveTargetCore(meat, doneness) : null;
+
+  useEffect(() => {
+    listMarinades().then(setMarinades);
+  }, []);
+  // Reset the marinade choice whenever the cut changes.
+  useEffect(() => {
+    setMarinadeId(undefined);
+    setMarinadeName(undefined);
+  }, [meatId]);
+  const cutMarinades = meatId ? marinades.filter((m) => m.meatId === meatId) : [];
 
   const pickPhoto = async () => {
     const res = await ImagePicker.launchCameraAsync({ base64: true, quality: 0.7 });
@@ -66,6 +82,8 @@ export default function NewCookScreen({ navigation }: Props) {
       weightKg: weight ? parseFloat(weight.replace(',', '.')) : undefined,
       thicknessCm: thickness ? parseFloat(thickness.replace(',', '.')) : undefined,
       photoUri,
+      marinadeId,
+      marinadeName,
     });
     navigation.replace('Cook');
   };
@@ -154,6 +172,23 @@ export default function NewCookScreen({ navigation }: Props) {
             value={useWeight ? weight : thickness}
             onChangeText={useWeight ? setWeight : setThickness}
           />
+
+          <Text style={styles.label}>Marinade (optioneel)</Text>
+          {cutMarinades.length > 0 ? (
+            <PickerSheet
+              title={`Marinades voor ${meat.name}`}
+              options={cutMarinades.map((m) => ({ id: m.id, label: m.name || 'Naamloos', sub: m.rating != null ? `${m.rating}/10` : undefined, emoji: '🧂' }))}
+              value={marinadeId}
+              placeholder="Geen marinade"
+              noneLabel="Geen marinade"
+              onSelect={(id) => {
+                setMarinadeId(id);
+                setMarinadeName(cutMarinades.find((m) => m.id === id)?.name);
+              }}
+            />
+          ) : (
+            <Text style={styles.hintSmall}>Nog geen marinades voor {meat.name}. Voeg ze toe in de Marinades-tab.</Text>
+          )}
         </View>
       )}
 
@@ -183,6 +218,7 @@ const styles = StyleSheet.create({
   goalLabel: { color: theme.colors.textDim, fontSize: theme.font.small, textAlign: 'center' },
   goalVal: { color: theme.colors.text, fontSize: theme.font.body, fontWeight: '700' },
   tips: { color: theme.colors.textDim, fontSize: theme.font.small, lineHeight: 20 },
+  hintSmall: { color: theme.colors.textDim, fontSize: theme.font.small },
   label: { color: theme.colors.text, fontSize: theme.font.small, fontWeight: '600' },
   row: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   inlineRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },

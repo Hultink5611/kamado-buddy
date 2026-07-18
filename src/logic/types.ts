@@ -36,6 +36,9 @@ export interface CookInput {
   thicknessCm?: number;
   frozen: boolean;
   photoUri?: string;
+  /** Optional marinade used for this cook (shown in the logbook). */
+  marinadeId?: string;
+  marinadeName?: string;
 }
 
 export interface TempSample {
@@ -93,6 +96,8 @@ export interface Marinade {
   name: string;
   /** Which cut it's for, free text (e.g. "Short rib"). */
   forMeat?: string;
+  /** Link to the meat/vegetable in the list, so marinades group per cut. */
+  meatId?: string;
   /** How much meat the amounts are for, e.g. "4 hamburgers (~600 g)". */
   amount?: string;
   ingredients: string;

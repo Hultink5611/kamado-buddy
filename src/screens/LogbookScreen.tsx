@@ -48,7 +48,9 @@ export default function LogbookScreen({ navigation }: Props) {
               <Text style={styles.emoji}>{'🍖'}</Text>
             )}
             <View style={{ flex: 1 }}>
-              <Text style={styles.name}>{item.meatName}</Text>
+              <Text style={styles.name}>
+                {item.meatName}{item.input.marinadeName ? ` · 🧂 ${item.input.marinadeName}` : ''}
+              </Text>
               <Text style={styles.meta}>
                 {d.toLocaleDateString('nl-NL')} · {mins} min · piek kern {Math.round(peakMeat)}°
               </Text>
