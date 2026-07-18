@@ -103,21 +103,7 @@ export async function coachSteer(keys: AIKeys, context: string): Promise<string>
     'Je bent een ervaren kamado-BBQ-coach. Antwoord in het Nederlands, kort en concreet ' +
     '(max 3 zinnen), met een directe tip. Gebruik geen inleiding.\n\n' +
     context;
-  const providers: Array<() => Promise<string>> = [];
-  if (keys.openaiKey) providers.push(() => callOpenAI(keys.openaiKey!, prompt));
-  if (keys.geminiKey) providers.push(() => callGemini(keys.geminiKey!, prompt));
-  if (keys.groqKey) providers.push(() => callGroq(keys.groqKey!, prompt));
-  if (providers.length === 0) throw new Error('Geen AI-sleutel ingesteld');
-
-  let lastErr: unknown;
-  for (const run of providers) {
-    try {
-      return await run();
-    } catch (e) {
-      lastErr = e; // e.g. Gemini 429 -> val door naar de volgende provider
-    }
-  }
-  throw lastErr instanceof Error ? lastErr : new Error('AI mislukt');
+  return textChain(keys, prompt);
 }
 
 export interface MeatGuess {
@@ -233,30 +219,35 @@ export interface MarinadeSuggestion {
   method: string;
 }
 
-/** Let the AI invent a marinade for a given cut. Tries OpenAI → Gemini → Groq. */
-export async function suggestMarinade(keys: AIKeys, cut: string): Promise<MarinadeSuggestion> {
-  const prompt =
-    `Bedenk één lekkere, verrassende marinade voor "${cut}" op de kamado-BBQ. ` +
-    'Geef concrete ingrediënten met hoeveelheden, vermeld voor HOEVEEL vlees die hoeveelheden zijn, ' +
-    'en een korte methode inclusief marineertijd. ' +
-    'Antwoord ALLEEN als JSON: {"name":"korte pakkende naam","amount":"voor hoeveel vlees, bijv. \\"4 hamburgers (~600 g)\\"","ingredients":"ingredient 1\\ningredient 2\\n...","method":"kort stappenplan + marineertijd"}';
+/** Run a text prompt through the provider chain (OpenAI → Gemini → Groq). */
+async function textChain(keys: AIKeys, prompt: string): Promise<string> {
   const providers: Array<() => Promise<string>> = [];
   if (keys.openaiKey) providers.push(() => callOpenAI(keys.openaiKey!, prompt));
   if (keys.geminiKey) providers.push(() => callGemini(keys.geminiKey!, prompt));
   if (keys.groqKey) providers.push(() => callGroq(keys.groqKey!, prompt));
   if (providers.length === 0) throw new Error('Geen AI-sleutel ingesteld');
-
-  let raw = '';
   let lastErr: unknown;
   for (const run of providers) {
     try {
-      raw = await run();
-      break;
+      return await run();
     } catch (e) {
-      lastErr = e;
+      lastErr = e; // e.g. Gemini 429 -> volgende provider
     }
   }
-  if (!raw) throw lastErr instanceof Error ? lastErr : new Error('AI mislukt');
+  throw lastErr instanceof Error ? lastErr : new Error('AI mislukt');
+}
+
+/**
+ * Let the AI invent a marinade for a given cut. Tries OpenAI → Gemini → Groq.
+ * Optional `style` (e.g. "Surinaamse") steers the cuisine — used for random marinades.
+ */
+export async function suggestMarinade(keys: AIKeys, cut: string, style?: string): Promise<MarinadeSuggestion> {
+  const prompt =
+    `Bedenk één lekkere, verrassende marinade${style ? ` in ${style} stijl` : ''} voor "${cut}" op de kamado-BBQ. ` +
+    'Geef concrete ingrediënten met hoeveelheden, vermeld voor HOEVEEL vlees die hoeveelheden zijn, ' +
+    'en een korte methode inclusief marineertijd. ' +
+    'Antwoord ALLEEN als JSON: {"name":"korte pakkende naam","amount":"voor hoeveel vlees, bijv. \\"4 hamburgers (~600 g)\\"","ingredients":"ingredient 1\\ningredient 2\\n...","method":"kort stappenplan + marineertijd"}';
+  const raw = await textChain(keys, prompt);
   const match = raw.match(/\{[\s\S]*\}/);
   if (match) {
     try {
@@ -272,4 +263,76 @@ export async function suggestMarinade(keys: AIKeys, cut: string): Promise<Marina
     }
   }
   return { name: `Marinade voor ${cut}`, amount: '', ingredients: raw.trim(), method: '' };
+}
+
+export interface MarinadeSearchResult extends MarinadeSuggestion {
+  /** The cut the recipe belongs to, e.g. "Kip" — matched to the meat list when possible. */
+  forMeat: string;
+}
+
+/**
+ * Free-text recipe search, e.g. "pittige Surinaamse kip" → a fitting marinade.
+ * `cuts` are the known meats/vegetables so the AI can link the recipe to one.
+ */
+export async function searchMarinade(
+  keys: AIKeys,
+  query: string,
+  cuts: string[]
+): Promise<MarinadeSearchResult> {
+  const prompt =
+    `De gebruiker zoekt een BBQ-marinade-recept: "${query}".\n` +
+    'Geef het best passende, authentieke recept voor op de kamado-BBQ. ' +
+    `Gaat het om een van deze stukken, gebruik dan die EXACTE naam als "forMeat": ${cuts.join(', ')}. ` +
+    'Anders vul je zelf het stuk vlees of de groente in. ' +
+    'Geef concrete ingrediënten met hoeveelheden, vermeld voor HOEVEEL vlees die hoeveelheden zijn, ' +
+    'en een korte methode inclusief marineertijd. ' +
+    'Antwoord ALLEEN als JSON: {"name":"korte pakkende naam","forMeat":"stuk vlees of groente","amount":"voor hoeveel, bijv. \\"4 kipdijen (~600 g)\\"","ingredients":"ingredient 1\\ningredient 2\\n...","method":"kort stappenplan + marineertijd"}';
+  const raw = await textChain(keys, prompt);
+  const match = raw.match(/\{[\s\S]*\}/);
+  if (match) {
+    try {
+      const p = JSON.parse(match[0]);
+      return {
+        name: p.name ?? query,
+        forMeat: p.forMeat ?? '',
+        amount: p.amount ?? '',
+        ingredients: p.ingredients ?? '',
+        method: p.method ?? '',
+      };
+    } catch {
+      /* fall through to raw */
+    }
+  }
+  return { name: query, forMeat: '', amount: '', ingredients: raw.trim(), method: '' };
+}
+
+/** Rescale a marinade's ingredient amounts to a new quantity (AI-aware: spices sub-linear). */
+export async function scaleMarinade(
+  keys: AIKeys,
+  m: { name: string; forMeat?: string; amount?: string; ingredients: string; method?: string; target: string }
+): Promise<{ amount: string; ingredients: string; method: string }> {
+  const prompt =
+    `Herbereken deze BBQ-marinade naar een andere hoeveelheid.\n` +
+    `Naam: "${m.name}"${m.forMeat ? ` (voor ${m.forMeat})` : ''}.\n` +
+    `Huidige hoeveelheden zijn voor: ${m.amount || 'onbekend'}.\n` +
+    `Schaal naar: ${m.target}.\n` +
+    `Belangrijk: olie, zuur (azijn/citrus), sojasaus en andere vloeistoffen schaal je ongeveer recht evenredig. ` +
+    `Kruiden, zout, chili, peper en knoflook schaal je SUB-lineair (minder dan evenredig) zodat het niet te heftig wordt. ` +
+    `Rond af op praktische keukenmaten (theelepel/eetlepel/teentjes).\n` +
+    `Antwoord ALLEEN als JSON: {"amount":"${m.target} (met geschat gewicht)","ingredients":"ingredient 1\\ningredient 2\\n...","method":"korte methode + marineertijd"}`;
+  const raw = await textChain(keys, prompt);
+  const match = raw.match(/\{[\s\S]*\}/);
+  if (match) {
+    try {
+      const p = JSON.parse(match[0]);
+      return {
+        amount: p.amount ?? m.target,
+        ingredients: p.ingredients ?? m.ingredients,
+        method: p.method ?? m.method ?? '',
+      };
+    } catch {
+      /* fall through */
+    }
+  }
+  throw new Error('Kon het antwoord niet lezen');
 }

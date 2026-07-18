@@ -5,7 +5,7 @@ import * as ImagePicker from 'expo-image-picker';
 import * as FileSystem from 'expo-file-system';
 import { useApp } from '../state/AppContext';
 import { listMarinades, saveMarinade, deleteMarinade } from '../storage/db';
-import { suggestMarinade } from '../ai/steerAI';
+import { suggestMarinade, scaleMarinade, searchMarinade } from '../ai/steerAI';
 import type { Marinade, Meat } from '../logic/types';
 import { theme } from '../theme';
 
@@ -28,12 +28,14 @@ function CutPicker({
   meats,
   value,
   placeholder,
+  title,
   allowAll,
   onSelect,
 }: {
   meats: Meat[];
   value?: string; // meatId
   placeholder: string;
+  title?: string;
   allowAll?: boolean;
   onSelect: (meat: Meat | null) => void;
 }) {
@@ -42,7 +44,7 @@ function CutPicker({
   return (
     <>
       <Pressable style={styles.dropdown} onPress={() => setOpen(true)}>
-        <Text style={selected ? styles.dropdownVal : styles.dropdownPlaceholder}>
+        <Text style={selected ? styles.dropdownVal : styles.dropdownPlaceholder} numberOfLines={1}>
           {selected ? `${selected.emoji} ${selected.name}` : placeholder}
         </Text>
         <Text style={styles.caret}>▾</Text>
@@ -50,7 +52,7 @@ function CutPicker({
       <Modal visible={open} transparent animationType="fade" onRequestClose={() => setOpen(false)}>
         <Pressable style={styles.backdrop} onPress={() => setOpen(false)}>
           <View style={styles.sheet}>
-            <Text style={styles.sheetTitle}>Kies vlees of groente</Text>
+            <Text style={styles.sheetTitle}>{title ?? 'Kies vlees of groente'}</Text>
             <ScrollView>
               {allowAll && (
                 <Pressable style={styles.sheetRow} onPress={() => { onSelect(null); setOpen(false); }}>
@@ -73,17 +75,29 @@ function CutPicker({
   );
 }
 
+/** Cuisine styles the 🎲 random button rolls from (client-side, so it's really random). */
+const RANDOM_STYLES = [
+  'Surinaamse', 'Koreaanse', 'Mexicaanse', 'Thaise', 'Marokkaanse', 'Argentijnse',
+  'Japanse', 'Griekse', 'Indiase', 'Caribische', 'Texaanse', 'Libanese',
+  'Indonesische', 'Italiaanse', 'Franse', 'Portugese', 'Turkse', 'Cubaanse',
+];
+
 export default function MarinadesScreen() {
   const { settings, meats } = useApp();
   const [marinades, setMarinades] = useState<Marinade[]>([]);
   const [draft, setDraft] = useState<Marinade | null>(null);
   const [filterId, setFilterId] = useState<string | undefined>(undefined);
-  const [aiBusy, setAiBusy] = useState(false);
+  const [query, setQuery] = useState('');
+  const [busy, setBusy] = useState<null | 'suggest' | 'search' | 'random'>(null);
 
   const reload = useCallback(() => {
     listMarinades().then(setMarinades);
   }, []);
   useFocusEffect(reload);
+
+  // Separate dropdowns: meats vs vegetables.
+  const meatCuts = useMemo(() => meats.filter((m) => m.category !== 'Groente'), [meats]);
+  const vegCuts = useMemo(() => meats.filter((m) => m.category === 'Groente'), [meats]);
 
   const filterMeat = meats.find((m) => m.id === filterId);
   const shown = useMemo(
@@ -91,16 +105,26 @@ export default function MarinadesScreen() {
     [marinades, filterId]
   );
 
+  const hasKeys = !!(settings.keys.openaiKey || settings.keys.geminiKey || settings.keys.groqKey);
+  const needKeys = () => {
+    Alert.alert('Geen AI-sleutel', 'Stel een AI-sleutel in bij Instellingen.');
+  };
+
+  /** Match an AI "forMeat" string back to a meat in the list. */
+  const matchCut = (forMeat: string): Meat | undefined => {
+    const q = forMeat.toLowerCase();
+    return meats.find(
+      (mt) => q.includes(mt.name.toLowerCase()) || mt.name.toLowerCase().includes(q)
+    );
+  };
+
   const askAI = async () => {
-    if (!settings.keys.openaiKey && !settings.keys.geminiKey && !settings.keys.groqKey) {
-      Alert.alert('Geen AI-sleutel', 'Stel een AI-sleutel in bij Instellingen.');
-      return;
-    }
+    if (!hasKeys) return needKeys();
     if (!filterMeat) {
       Alert.alert('Kies eerst een stuk', 'Selecteer bovenaan een vlees of groente.');
       return;
     }
-    setAiBusy(true);
+    setBusy('suggest');
     try {
       const s = await suggestMarinade(settings.keys, filterMeat.name);
       setDraft({
@@ -115,7 +139,59 @@ export default function MarinadesScreen() {
     } catch (e) {
       Alert.alert('AI mislukt', String(e));
     } finally {
-      setAiBusy(false);
+      setBusy(null);
+    }
+  };
+
+  const randomAI = async () => {
+    if (!hasKeys) return needKeys();
+    // Cut: the selected one, or a random pick. Style: always a random cuisine.
+    const pool = filterMeat ? [filterMeat] : meats;
+    const cut = pool[Math.floor(Math.random() * pool.length)];
+    const style = RANDOM_STYLES[Math.floor(Math.random() * RANDOM_STYLES.length)];
+    setBusy('random');
+    try {
+      const s = await suggestMarinade(settings.keys, cut.name, style);
+      setDraft({
+        ...blankMarinade(),
+        name: s.name,
+        forMeat: cut.name,
+        meatId: cut.id,
+        amount: s.amount,
+        ingredients: s.ingredients,
+        method: s.method,
+      });
+    } catch (e) {
+      Alert.alert('AI mislukt', String(e));
+    } finally {
+      setBusy(null);
+    }
+  };
+
+  const searchAI = async () => {
+    if (!hasKeys) return needKeys();
+    const q = query.trim();
+    if (!q) {
+      Alert.alert('Typ eerst wat je zoekt', 'Bijvoorbeeld: pittige Surinaamse kip.');
+      return;
+    }
+    setBusy('search');
+    try {
+      const s = await searchMarinade(settings.keys, q, meats.map((mt) => mt.name));
+      const cut = s.forMeat ? matchCut(s.forMeat) : undefined;
+      setDraft({
+        ...blankMarinade(),
+        name: s.name,
+        forMeat: cut?.name ?? s.forMeat,
+        meatId: cut?.id,
+        amount: s.amount,
+        ingredients: s.ingredients,
+        method: s.method,
+      });
+    } catch (e) {
+      Alert.alert('AI mislukt', String(e));
+    } finally {
+      setBusy(null);
     }
   };
 
@@ -135,11 +211,54 @@ export default function MarinadesScreen() {
     <ScrollView contentContainerStyle={styles.content}>
       <View style={styles.aiCard}>
         <Text style={styles.aiH}>✨ Marinades per stuk</Text>
-        <Text style={styles.hint}>Kies een vlees of groente. Je ziet dan de opgeslagen marinades ervoor — en laat de AI er nieuwe bij bedenken.</Text>
-        <CutPicker meats={meats} value={filterId} placeholder="Kies vlees of groente" allowAll onSelect={(m) => setFilterId(m?.id)} />
+        <Text style={styles.hint}>Kies een vlees óf een groente. Je ziet dan de opgeslagen marinades ervoor — en laat de AI er nieuwe bij bedenken.</Text>
+        <View style={styles.pickRow}>
+          <View style={{ flex: 1 }}>
+            <CutPicker
+              meats={meatCuts}
+              value={meatCuts.some((m) => m.id === filterId) ? filterId : undefined}
+              placeholder="🥩 Vlees"
+              title="Kies vlees"
+              allowAll
+              onSelect={(m) => setFilterId(m?.id)}
+            />
+          </View>
+          <View style={{ flex: 1 }}>
+            <CutPicker
+              meats={vegCuts}
+              value={vegCuts.some((m) => m.id === filterId) ? filterId : undefined}
+              placeholder="🥬 Groente"
+              title="Kies groente"
+              allowAll
+              onSelect={(m) => setFilterId(m?.id)}
+            />
+          </View>
+        </View>
         <View style={styles.aiRow}>
-          <Pressable style={[styles.aiBtn, { flex: 1 }]} onPress={askAI} disabled={aiBusy}>
-            {aiBusy ? <ActivityIndicator color="#0d0f12" /> : <Text style={styles.aiBtnText}>{filterMeat ? `Bedenk voor ${filterMeat.name}` : 'Bedenk marinade'}</Text>}
+          <Pressable style={[styles.aiBtn, { flex: 1 }]} onPress={askAI} disabled={busy != null}>
+            {busy === 'suggest' ? <ActivityIndicator color="#0d0f12" /> : <Text style={styles.aiBtnText}>{filterMeat ? `Bedenk voor ${filterMeat.name}` : 'Bedenk marinade'}</Text>}
+          </Pressable>
+          <Pressable style={[styles.aiBtn, styles.aiBtnAlt]} onPress={randomAI} disabled={busy != null}>
+            {busy === 'random' ? <ActivityIndicator color={theme.colors.text} /> : <Text style={styles.aiBtnAltText}>🎲 Random</Text>}
+          </Pressable>
+        </View>
+      </View>
+
+      <View style={styles.aiCard}>
+        <Text style={styles.aiH}>🔍 Zoek met AI</Text>
+        <Text style={styles.hint}>Omschrijf wat je zoekt — bijv. “pittige Surinaamse kip” — en de AI vindt het recept.</Text>
+        <View style={styles.aiRow}>
+          <TextInput
+            style={[styles.input, { flex: 1 }]}
+            value={query}
+            onChangeText={setQuery}
+            placeholder="bijv. pittige Surinaamse kip"
+            placeholderTextColor={theme.colors.textDim}
+            returnKeyType="search"
+            onSubmitEditing={searchAI}
+          />
+          <Pressable style={styles.aiBtn} onPress={searchAI} disabled={busy != null}>
+            {busy === 'search' ? <ActivityIndicator color="#0d0f12" /> : <Text style={styles.aiBtnText}>Zoek</Text>}
           </Pressable>
         </View>
       </View>
@@ -185,6 +304,7 @@ function MarinadeForm({
   onSave: (m: Marinade) => void;
   onDelete: (id: string) => void;
 }) {
+  const { settings } = useApp();
   const [name, setName] = useState(draft.name);
   const [meatId, setMeatId] = useState<string | undefined>(draft.meatId);
   const [forMeat, setForMeat] = useState(draft.forMeat ?? '');
@@ -194,6 +314,44 @@ function MarinadeForm({
   const [note, setNote] = useState(draft.note ?? '');
   const [rating, setRating] = useState<number | undefined>(draft.rating);
   const [photoUri, setPhotoUri] = useState<string | undefined>(draft.photoUri);
+  const [target, setTarget] = useState('');
+  const [scaling, setScaling] = useState(false);
+
+  // AI-herberekening: vloeistoffen ~evenredig, kruiden sub-lineair.
+  const rescale = async () => {
+    if (!settings.keys.openaiKey && !settings.keys.geminiKey && !settings.keys.groqKey) {
+      Alert.alert('Geen AI-sleutel', 'Stel een AI-sleutel in bij Instellingen.');
+      return;
+    }
+    const t = target.trim();
+    if (!t) {
+      Alert.alert('Vul een aantal in', 'Bijvoorbeeld "8 hamburgers" of "1,2 kg kip".');
+      return;
+    }
+    if (!ingredients.trim()) {
+      Alert.alert('Geen ingrediënten', 'Er valt nog niets te herberekenen.');
+      return;
+    }
+    setScaling(true);
+    try {
+      const r = await scaleMarinade(settings.keys, {
+        name: name || 'marinade',
+        forMeat: forMeat || undefined,
+        amount: amount || undefined,
+        ingredients,
+        method: method || undefined,
+        target: t,
+      });
+      setAmount(r.amount);
+      setIngredients(r.ingredients);
+      if (r.method) setMethod(r.method);
+      setTarget('');
+    } catch (e) {
+      Alert.alert('Herberekenen mislukt', String(e));
+    } finally {
+      setScaling(false);
+    }
+  };
 
   const addPhoto = (fromCamera: boolean) => async () => {
     const res = fromCamera
@@ -258,6 +416,24 @@ function MarinadeForm({
       <Field label="Ingrediënten"><TextInput style={[styles.input, styles.multi]} value={ingredients} onChangeText={setIngredients} multiline placeholder="Eén per regel, met hoeveelheden" placeholderTextColor={theme.colors.textDim} /></Field>
       <Field label="Methode / marineertijd"><TextInput style={[styles.input, styles.multi]} value={method} onChangeText={setMethod} multiline placeholder="Hoe aanmaken + hoe lang marineren" placeholderTextColor={theme.colors.textDim} /></Field>
 
+      <Field label="🔢 Herbereken naar ander aantal (AI)">
+        <View style={styles.aiRow}>
+          <TextInput
+            style={[styles.input, { flex: 1 }]}
+            value={target}
+            onChangeText={setTarget}
+            placeholder="bijv. 8 hamburgers of 1,2 kg"
+            placeholderTextColor={theme.colors.textDim}
+            returnKeyType="done"
+            onSubmitEditing={rescale}
+          />
+          <Pressable style={styles.aiBtn} onPress={rescale} disabled={scaling}>
+            {scaling ? <ActivityIndicator color="#0d0f12" /> : <Text style={styles.aiBtnText}>Herbereken</Text>}
+          </Pressable>
+        </View>
+        <Text style={styles.hint}>De AI schaalt vloeistoffen evenredig mee en kruiden iets voorzichtiger.</Text>
+      </Field>
+
       <Field label="Cijfer">
         <View style={styles.ratingRow}>
           {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((n) => (
@@ -304,6 +480,9 @@ const styles = StyleSheet.create({
   aiRow: { flexDirection: 'row', gap: 8, alignItems: 'center' },
   aiBtn: { backgroundColor: theme.colors.accent, borderRadius: 10, paddingHorizontal: 16, paddingVertical: 12, alignItems: 'center', justifyContent: 'center' },
   aiBtnText: { color: '#0d0f12', fontWeight: '700' },
+  aiBtnAlt: { backgroundColor: theme.colors.cardAlt },
+  aiBtnAltText: { color: theme.colors.text, fontWeight: '700' },
+  pickRow: { flexDirection: 'row', gap: 8 },
   listHead: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 4 },
   listTitle: { color: theme.colors.text, fontSize: theme.font.h2, fontWeight: '700' },
   addLink: { color: theme.colors.accent, fontSize: theme.font.small, fontWeight: '600' },
