@@ -5,6 +5,8 @@ import {
   getMeat,
   resolveTargetDome,
   resolveTargetCoreForInput,
+  searDomeTarget,
+  SEAR_LEAD_C,
   computeMeats,
   setMeatCustomization,
   upsertMeat,
@@ -138,6 +140,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     learnedFired: false,
     flipNotifiedAt: 0, // the lastFlipAt value we already sent a "flip" alarm for
     lastAmbientAlarmAt: 0, // debounce the "BBQ out of range" alarm
+    searPrompted: false, // "tijd om te searen" alarm already sent
     appliedVent: { bottom: 0.5, top: 0.5 },
   });
 
@@ -149,6 +152,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       learnedFired: false,
       flipNotifiedAt: 0,
       lastAmbientAlarmAt: 0,
+      searPrompted: false,
       appliedVent: { bottom: 0.5, top: 0.5 },
     };
     setActiveCook({
@@ -161,6 +165,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       manualMeat: '',
       grillOnAt: null, // set when the user taps "vlees ligt erop"
       lastFlipAt: now,
+      searStartedAt: null, // set when the user taps "ik ga searen"
     });
     // "Meat can go on" reminder after the meat's temper time.
     const meat = getMeat(input.meatId);
@@ -212,7 +217,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       if (!ac) return;
       const meat = getMeat(ac.input.meatId);
       if (!meat) return;
-      const targetDomeC = resolveTargetDome(meat, ac.input);
+      // During the final sear phase the BBQ target jumps to the hot sear temp,
+      // so coaching + the "BBQ too hot" alarm follow the sear instead of nagging.
+      const searing = ac.searStartedAt != null;
+      const targetDomeC = searing ? searDomeTarget(meat) : resolveTargetDome(meat, ac.input);
       const targetCoreC = resolveTargetCoreForInput(meat, ac.input);
       const currentAmbient =
         s.ink.channels[ac.ambientCh] ?? (ac.manualAmbient ? parseFloat(ac.manualAmbient) : null);
@@ -246,6 +254,24 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         advice,
         active: true,
       });
+
+      // Reverse sear: prompt to start searing a few °C before the core target,
+      // but only once the meat is on and you haven't started searing yet.
+      if (
+        ac.input.searFinish &&
+        !searing &&
+        !alarmRef.current.searPrompted &&
+        ac.grillOnAt != null &&
+        targetCoreC != null &&
+        currentMeat != null &&
+        currentMeat >= targetCoreC - SEAR_LEAD_C
+      ) {
+        alarmRef.current.searPrompted = true;
+        void fireAlarm(
+          '🔥 Tijd om dicht te schroeien!',
+          `Kern zit op ${Math.round(currentMeat)}°C. Open de BBQ, stook op naar ~${searDomeTarget(meat)}°C en schroei kort dicht tot ${targetCoreC}°C. Tik op "Ik ga searen" in de app.`
+        );
+      }
 
       // Core-temp reached alarm.
       if (

@@ -95,6 +95,14 @@ export function resolveTargetDome(meat: Meat, input: CookInput): number {
   return input.domeTempOverrideC ?? meat.domeTempC;
 }
 
+/** Start the sear this many °C before the core target (reverse sear). */
+export const SEAR_LEAD_C = 8;
+
+/** The hot BBQ target for the final sear phase. */
+export function searDomeTarget(meat: Meat): number {
+  return meat.searDomeTempC ?? 230;
+}
+
 /** Effective core target: explicit override > doneness/meat default. */
 export function resolveTargetCoreForInput(meat: Meat, input: CookInput): number | null {
   return input.coreTempOverrideC ?? resolveTargetCore(meat, input.doneness);
