@@ -136,6 +136,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     ambientOut: false,
     learnedFired: false,
     flipNotifiedAt: 0, // the lastFlipAt value we already sent a "flip" alarm for
+    lastAmbientAlarmAt: 0, // debounce the "BBQ out of range" alarm
     appliedVent: { bottom: 0.5, top: 0.5 },
   });
 
@@ -146,6 +147,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       ambientOut: false,
       learnedFired: false,
       flipNotifiedAt: 0,
+      lastAmbientAlarmAt: 0,
       appliedVent: { bottom: 0.5, top: 0.5 },
     };
     setActiveCook({
@@ -270,11 +272,15 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         }
       }
 
-      // BBQ out-of-range alarm.
-      if (currentAmbient != null) {
+      // BBQ out-of-range alarm — only once the meat is on the grill (no alarms
+      // while pre-heating), re-armed when back in range, and at most once per
+      // 10 min so normal temp swings don't spam notifications.
+      if (ac.grillOnAt != null && currentAmbient != null) {
         const off = Math.abs(currentAmbient - targetDomeC) > s.settings.alarmMarginC;
-        if (off && !alarmRef.current.ambientOut) {
+        const quietForMs = Date.now() - alarmRef.current.lastAmbientAlarmAt;
+        if (off && !alarmRef.current.ambientOut && quietForMs > 10 * 60_000) {
           alarmRef.current.ambientOut = true;
+          alarmRef.current.lastAmbientAlarmAt = Date.now();
           void fireAlarm(
             '🌡️ BBQ buiten bereik',
             `Omgeving ${Math.round(currentAmbient)}°C (doel ${targetDomeC}°C). ${advice.detail}`
