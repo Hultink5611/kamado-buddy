@@ -95,6 +95,7 @@ function MeatForm({ draft, onCancel, onSave }: { draft: Meat; onCancel: () => vo
   );
   const [frozen, setFrozen] = useState(String(draft.frozenFactor));
   const [tips, setTips] = useState(draft.tips);
+  const [story, setStory] = useState(draft.story ?? '');
 
   const numOr = (s: string, fb: number) => {
     const n = parseFloat(s.replace(',', '.'));
@@ -128,6 +129,7 @@ function MeatForm({ draft, onCancel, onSave }: { draft: Meat; onCancel: () => vo
       },
       frozenFactor: numOr(frozen, 1.5),
       tips: tips.trim(),
+      story: story.trim() || undefined,
     };
     onSave(meat);
   };
@@ -173,6 +175,7 @@ function MeatForm({ draft, onCancel, onSave }: { draft: Meat; onCancel: () => vo
 
       <Field label="Diepvries-factor (×tijd)"><TextInput style={styles.input} value={frozen} onChangeText={setFrozen} keyboardType="numeric" placeholderTextColor={theme.colors.textDim} /></Field>
       <Field label="Tips"><TextInput style={[styles.input, styles.multi]} value={tips} onChangeText={setTips} multiline placeholder="Korte bereidingstip" placeholderTextColor={theme.colors.textDim} /></Field>
+      <Field label="📖 Zo doen de meesten het"><TextInput style={[styles.input, styles.multi]} value={story} onChangeText={setStory} multiline placeholder="bijv. Direct zonder deflector rond 200°C, deksel dicht, 2x keren…" placeholderTextColor={theme.colors.textDim} /></Field>
 
       <View style={styles.two}>
         <Pressable style={[styles.saveBtn, styles.cancelBtn]} onPress={onCancel}><Text style={styles.cancelText}>Annuleer</Text></Pressable>

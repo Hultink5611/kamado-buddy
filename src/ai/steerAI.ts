@@ -145,6 +145,7 @@ function buildDiscoveredMeat(name: string, n: Record<string, unknown>): Meat {
     restMin: toNum(n.restMin, 5),
     temperMin: n.temperMin == null ? 30 : toNum(n.temperMin, 30),
     tips: (typeof n.tips === 'string' && n.tips) || '',
+    story: (typeof n.story === 'string' && n.story) || undefined,
   });
 }
 
@@ -182,7 +183,11 @@ export async function identifyMeat(
     '"notes": "korte tip", "new": null of {"emoji":"🍖","category":"...","method":"direct|indirect|reverse",' +
     '"domeTempC":<n>,"coreTempC":<n of null>,"flipIntervalMin":<n of null>,"restMin":<n>,' +
     '"estimateType":"thickness|weight","baseMin":<n>,"minPerCm":<n of null>,"minPerKg":<n of null>,' +
-    '"frozenFactor":<n>,"temperMin":<minuten laten temperen voor het erop gaat>,"tips":"korte bereidingstip"}}';
+    '"frozenFactor":<n>,"temperMin":<minuten laten temperen voor het erop gaat>,"tips":"korte bereidingstip",' +
+    '"story":"2-3 zinnen hoe de meeste kamado-BBQ\'ers dit stuk bereiden, gebaseerd op gangbare praktijk ' +
+    '(AmazingRibs/Weber-stijl kennis): deksel open of dicht, mét of zónder deflector/plaatsteen, ' +
+    'welk temperatuurbereik, en hoe vaak keren. Bijv.: \\"De meesten grillen dit direct zonder deflector ' +
+    'rond 180-220°C met de deksel dicht en keren 2x.\\""}}';
 
   // Vision-capable providers, in preference order; fall through on error.
   const vision: Array<() => Promise<string>> = [];
