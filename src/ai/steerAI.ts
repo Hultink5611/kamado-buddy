@@ -244,9 +244,9 @@ async function textChain(keys: AIKeys, prompt: string): Promise<string> {
 export async function suggestMarinade(keys: AIKeys, cut: string, style?: string): Promise<MarinadeSuggestion> {
   const prompt =
     `Bedenk één lekkere, verrassende marinade${style ? ` in ${style} stijl` : ''} voor "${cut}" op de kamado-BBQ. ` +
-    'Geef concrete ingrediënten met hoeveelheden, vermeld voor HOEVEEL vlees die hoeveelheden zijn, ' +
-    'en een korte methode inclusief marineertijd. ' +
-    'Antwoord ALLEEN als JSON: {"name":"korte pakkende naam","amount":"voor hoeveel vlees, bijv. \\"4 hamburgers (~600 g)\\"","ingredients":"ingredient 1\\ningredient 2\\n...","method":"kort stappenplan + marineertijd"}';
+    `Geef concrete ingrediënten met hoeveelheden en vermeld voor HOEVEEL "${cut}" die hoeveelheden precies zijn (aantal stuks én geschat gewicht). ` +
+    'De methode moet óók duidelijk maken HOE je het op de kamado bereidt: direct op het rooster, in een aluminium pakketje, op een grillplaat/plancha of aan spiesen — kies wat het beste past bij dit stuk — plus de zone/temperatuur en de marineertijd. ' +
+    `Antwoord ALLEEN als JSON: {"name":"korte pakkende naam","amount":"voor hoeveel ${cut}, bijv. \\"4 stuks (~500 g)\\"","ingredients":"ingredient 1\\ningredient 2\\n...","method":"hoe marineren + marineertijd + hoe grillen op de kamado (folie/rooster/grillplaat/spies)"}`;
   const raw = await textChain(keys, prompt);
   const match = raw.match(/\{[\s\S]*\}/);
   if (match) {
@@ -284,9 +284,9 @@ export async function searchMarinade(
     'Geef het best passende, authentieke recept voor op de kamado-BBQ. ' +
     `Gaat het om een van deze stukken, gebruik dan die EXACTE naam als "forMeat": ${cuts.join(', ')}. ` +
     'Anders vul je zelf het stuk vlees of de groente in. ' +
-    'Geef concrete ingrediënten met hoeveelheden, vermeld voor HOEVEEL vlees die hoeveelheden zijn, ' +
-    'en een korte methode inclusief marineertijd. ' +
-    'Antwoord ALLEEN als JSON: {"name":"korte pakkende naam","forMeat":"stuk vlees of groente","amount":"voor hoeveel, bijv. \\"4 kipdijen (~600 g)\\"","ingredients":"ingredient 1\\ningredient 2\\n...","method":"kort stappenplan + marineertijd"}';
+    'Geef concrete ingrediënten met hoeveelheden en vermeld voor HOEVEEL stuks (én geschat gewicht) die hoeveelheden zijn. ' +
+    'De methode moet óók duidelijk maken HOE je het op de kamado bereidt: direct op het rooster, in een aluminium pakketje, op een grillplaat/plancha of aan spiesen — plus zone/temperatuur en marineertijd. ' +
+    'Antwoord ALLEEN als JSON: {"name":"korte pakkende naam","forMeat":"stuk vlees of groente","amount":"voor hoeveel, bijv. \\"4 kipdijen (~600 g)\\"","ingredients":"ingredient 1\\ningredient 2\\n...","method":"hoe marineren + marineertijd + hoe grillen op de kamado (folie/rooster/grillplaat/spies)"}';
   const raw = await textChain(keys, prompt);
   const match = raw.match(/\{[\s\S]*\}/);
   if (match) {
@@ -306,6 +306,38 @@ export async function searchMarinade(
   return { name: query, forMeat: '', amount: '', ingredients: raw.trim(), method: '' };
 }
 
+/**
+ * Fill the gaps of an EXISTING recipe without changing the ingredients:
+ *  - a clear "voor hoeveel" for the specific cut (aantal stuks + gewicht);
+ *  - a complete kamado prep method (folie / rooster / grillplaat / spies).
+ */
+export async function enrichMarinade(
+  keys: AIKeys,
+  m: { name: string; forMeat?: string; amount?: string; ingredients: string; method?: string }
+): Promise<{ amount: string; method: string }> {
+  const prompt =
+    `Vul deze bestaande BBQ-marinade aan ZONDER de ingrediënten te wijzigen.\n` +
+    `Naam: "${m.name}"${m.forMeat ? ` (voor ${m.forMeat})` : ''}.\n` +
+    `Ingrediënten:\n${m.ingredients}\n` +
+    (m.amount ? `Huidige "voor hoeveel"-notitie: ${m.amount}\n` : '') +
+    (m.method ? `Huidige methode: ${m.method}\n` : '') +
+    `Geef twee dingen terug:\n` +
+    `1) "amount": voor hoeveel ${m.forMeat || 'stuks'} deze hoeveelheden precies bedoeld zijn — aantal stuks én geschat gewicht.\n` +
+    `2) "method": een complete bereiding op de kamado-BBQ: hoe aanmaken + marineertijd, en HOE je het grilt — direct op het rooster, in een aluminium pakketje, op een grillplaat/plancha of aan spiesen (kies wat het beste past), met de juiste zone/temperatuur.\n` +
+    `Antwoord ALLEEN als JSON: {"amount":"...","method":"..."}`;
+  const raw = await textChain(keys, prompt);
+  const match = raw.match(/\{[\s\S]*\}/);
+  if (match) {
+    try {
+      const p = JSON.parse(match[0]);
+      return { amount: p.amount ?? m.amount ?? '', method: p.method ?? m.method ?? '' };
+    } catch {
+      /* fall through */
+    }
+  }
+  throw new Error('Kon het antwoord niet lezen');
+}
+
 /** Rescale a marinade's ingredient amounts to a new quantity (AI-aware: spices sub-linear). */
 export async function scaleMarinade(
   keys: AIKeys,
@@ -319,7 +351,8 @@ export async function scaleMarinade(
     `Belangrijk: olie, zuur (azijn/citrus), sojasaus en andere vloeistoffen schaal je ongeveer recht evenredig. ` +
     `Kruiden, zout, chili, peper en knoflook schaal je SUB-lineair (minder dan evenredig) zodat het niet te heftig wordt. ` +
     `Rond af op praktische keukenmaten (theelepel/eetlepel/teentjes).\n` +
-    `Antwoord ALLEEN als JSON: {"amount":"${m.target} (met geschat gewicht)","ingredients":"ingredient 1\\ningredient 2\\n...","method":"korte methode + marineertijd"}`;
+    `Behoud in de methode de bereiding: hoe marineren + marineertijd én hoe grillen op de kamado (folie/rooster/grillplaat/spies).\n` +
+    `Antwoord ALLEEN als JSON: {"amount":"${m.target} (met geschat gewicht)","ingredients":"ingredient 1\\ningredient 2\\n...","method":"hoe marineren + marineertijd + hoe grillen op de kamado"}`;
   const raw = await textChain(keys, prompt);
   const match = raw.match(/\{[\s\S]*\}/);
   if (match) {
