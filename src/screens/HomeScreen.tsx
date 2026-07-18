@@ -100,27 +100,12 @@ export default function HomeScreen({ navigation }: Props) {
           <Text style={styles.ctaSub}>Kies je vlees en start</Text>
         </Pressable>
 
-        <View style={styles.grid}>
-          <Tile emoji="🍖" onPress={() => navigation.navigate('MeatEdit')} label="Vlees" />
-          <Tile emoji="🎯" onPress={() => navigation.navigate('Calibration')} label="Kalibratie" />
-          <Tile emoji="⚙️" onPress={() => navigation.navigate('Settings')} label="Instellingen" />
-        </View>
-
         <Text style={styles.hint}>
           Tip: sluit de originele Inkbird-app voor je verbindt — er kan maar één app tegelijk met de meter praten.
         </Text>
         <Text style={styles.hint}>↓ Swipe omlaag om de app bij te werken.</Text>
       </ScrollView>
     </SafeAreaView>
-  );
-}
-
-function Tile({ emoji, label, onPress }: { emoji: string; label: string; onPress: () => void }) {
-  return (
-    <Pressable style={styles.tile} onPress={onPress}>
-      <Text style={styles.tileEmoji}>{emoji}</Text>
-      <Text style={styles.tileLabel}>{label}</Text>
-    </Pressable>
   );
 }
 
@@ -140,13 +125,9 @@ const styles = StyleSheet.create({
   connectBtn: { backgroundColor: theme.colors.accent, borderRadius: 12, paddingVertical: 12, alignItems: 'center' },
   connectText: { color: '#0d0f12', fontWeight: '700', fontSize: theme.font.body },
   disc: { color: theme.colors.textDim, fontSize: theme.font.small, textAlign: 'center' },
-  cta: { backgroundColor: theme.colors.card, borderRadius: theme.radius, padding: theme.space(6), alignItems: 'center', gap: 4 },
+  cta: { backgroundColor: theme.colors.accent, borderRadius: theme.radius, padding: theme.space(6), alignItems: 'center', gap: 4 },
   ctaEmoji: { fontSize: 40 },
-  ctaText: { color: theme.colors.text, fontSize: theme.font.h1, fontWeight: '700' },
-  ctaSub: { color: theme.colors.textDim, fontSize: theme.font.small },
-  grid: { flexDirection: 'row', gap: theme.space(3) },
-  tile: { flex: 1, backgroundColor: theme.colors.card, borderRadius: theme.radius, padding: theme.space(4), alignItems: 'center', gap: 6 },
-  tileEmoji: { fontSize: 26 },
-  tileLabel: { color: theme.colors.text, fontSize: theme.font.small },
+  ctaText: { color: '#0d0f12', fontSize: theme.font.h1, fontWeight: '800' },
+  ctaSub: { color: '#0d0f12', fontSize: theme.font.small, opacity: 0.8 },
   hint: { color: theme.colors.textDim, fontSize: theme.font.small, lineHeight: 19 },
 });
