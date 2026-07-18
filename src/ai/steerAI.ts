@@ -228,6 +228,7 @@ export async function identifyMeat(
 
 export interface MarinadeSuggestion {
   name: string;
+  amount: string;
   ingredients: string;
   method: string;
 }
@@ -236,8 +237,9 @@ export interface MarinadeSuggestion {
 export async function suggestMarinade(keys: AIKeys, cut: string): Promise<MarinadeSuggestion> {
   const prompt =
     `Bedenk één lekkere, verrassende marinade voor "${cut}" op de kamado-BBQ. ` +
-    'Geef concrete ingrediënten met hoeveelheden en een korte methode inclusief marineertijd. ' +
-    'Antwoord ALLEEN als JSON: {"name":"korte pakkende naam","ingredients":"ingredient 1\\ningredient 2\\n...","method":"kort stappenplan + marineertijd"}';
+    'Geef concrete ingrediënten met hoeveelheden, vermeld voor HOEVEEL vlees die hoeveelheden zijn, ' +
+    'en een korte methode inclusief marineertijd. ' +
+    'Antwoord ALLEEN als JSON: {"name":"korte pakkende naam","amount":"voor hoeveel vlees, bijv. \\"4 hamburgers (~600 g)\\"","ingredients":"ingredient 1\\ningredient 2\\n...","method":"kort stappenplan + marineertijd"}';
   const providers: Array<() => Promise<string>> = [];
   if (keys.openaiKey) providers.push(() => callOpenAI(keys.openaiKey!, prompt));
   if (keys.geminiKey) providers.push(() => callGemini(keys.geminiKey!, prompt));
@@ -261,6 +263,7 @@ export async function suggestMarinade(keys: AIKeys, cut: string): Promise<Marina
       const p = JSON.parse(match[0]);
       return {
         name: p.name ?? `Marinade voor ${cut}`,
+        amount: p.amount ?? '',
         ingredients: p.ingredients ?? '',
         method: p.method ?? '',
       };
@@ -268,5 +271,5 @@ export async function suggestMarinade(keys: AIKeys, cut: string): Promise<Marina
       /* fall through to raw */
     }
   }
-  return { name: `Marinade voor ${cut}`, ingredients: raw.trim(), method: '' };
+  return { name: `Marinade voor ${cut}`, amount: '', ingredients: raw.trim(), method: '' };
 }
