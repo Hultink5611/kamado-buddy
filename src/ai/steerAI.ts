@@ -348,6 +348,34 @@ export async function enrichMarinade(
   throw new Error('Kon het antwoord niet lezen');
 }
 
+/**
+ * Spar over the current marinade: substitutions ("geen sesamolie — wat nu?"),
+ * tweaks, pairing questions. The marinade + chat history travel along as
+ * context so follow-up questions work.
+ */
+export async function marinadeChat(
+  keys: AIKeys,
+  m: { name: string; forMeat?: string; amount?: string; ingredients: string; method?: string },
+  history: { role: 'user' | 'ai'; text: string }[],
+  question: string
+): Promise<string> {
+  const conv = history
+    .slice(-8)
+    .map((h) => `${h.role === 'user' ? 'Gebruiker' : 'Jij'}: ${h.text}`)
+    .join('\n');
+  const prompt =
+    `Je bent een ervaren BBQ-marinade-expert. De gebruiker werkt aan deze marinade:\n` +
+    `Naam: ${m.name || 'naamloos'}${m.forMeat ? ` (voor ${m.forMeat})` : ''}\n` +
+    (m.amount ? `Voor: ${m.amount}\n` : '') +
+    `Ingrediënten:\n${m.ingredients || '(nog leeg)'}\n` +
+    (m.method ? `Methode: ${m.method}\n` : '') +
+    (conv ? `\nEerder in dit gesprek:\n${conv}\n` : '') +
+    `\nNieuwe vraag van de gebruiker: ${question}\n\n` +
+    `Antwoord in het Nederlands, kort en praktisch (max 4 zinnen). Geef bij vervangers concrete ` +
+    `verhoudingen (bijv. "vervang 1 el sesamolie door 1 el neutrale olie + 1 tl geroosterd sesamzaad"). Geen inleiding.`;
+  return textChain(keys, prompt);
+}
+
 /** Rescale a marinade's ingredient amounts to a new quantity (AI-aware: spices sub-linear). */
 export async function scaleMarinade(
   keys: AIKeys,
