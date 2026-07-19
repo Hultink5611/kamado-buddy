@@ -5,7 +5,7 @@ import * as ImagePicker from 'expo-image-picker';
 import * as FileSystem from 'expo-file-system';
 import { useApp } from '../state/AppContext';
 import { listMarinades, saveMarinade, deleteMarinade } from '../storage/db';
-import { suggestMarinade, scaleMarinade, searchMarinade, enrichMarinade } from '../ai/steerAI';
+import { suggestMarinade, scaleMarinade, searchMarinade, enrichMarinade, marinadeChat } from '../ai/steerAI';
 import type { Marinade, Meat } from '../logic/types';
 import { theme } from '../theme';
 
@@ -317,6 +317,9 @@ function MarinadeForm({
   const [target, setTarget] = useState('');
   const [scaling, setScaling] = useState(false);
   const [enriching, setEnriching] = useState(false);
+  const [chat, setChat] = useState<{ role: 'user' | 'ai'; text: string }[]>([]);
+  const [chatInput, setChatInput] = useState('');
+  const [chatBusy, setChatBusy] = useState(false);
 
   // Placeholder voor "Voor hoeveel": gebruik het gekozen stuk, nooit hardcoded "hamburgers".
   const cutName = (meats.find((m) => m.id === meatId)?.name || forMeat).trim();
@@ -386,6 +389,29 @@ function MarinadeForm({
       Alert.alert('Herberekenen mislukt', String(e));
     } finally {
       setScaling(false);
+    }
+  };
+
+  // Spar with the AI about this marinade (substitutions, tweaks, pairings).
+  const askChat = async () => {
+    if (!hasKeys()) return;
+    const q = chatInput.trim();
+    if (!q) return;
+    setChatInput('');
+    setChat((c) => [...c, { role: 'user', text: q }]);
+    setChatBusy(true);
+    try {
+      const answer = await marinadeChat(
+        settings.keys,
+        { name: name || 'marinade', forMeat: forMeat || undefined, amount: amount || undefined, ingredients, method: method || undefined },
+        chat,
+        q
+      );
+      setChat((c) => [...c, { role: 'ai', text: answer.trim() }]);
+    } catch (e) {
+      setChat((c) => [...c, { role: 'ai', text: `Mislukt: ${String(e)}` }]);
+    } finally {
+      setChatBusy(false);
     }
   };
 
@@ -475,6 +501,34 @@ function MarinadeForm({
         <Text style={styles.hint}>De AI schaalt vloeistoffen evenredig mee en kruiden iets voorzichtiger.</Text>
       </Field>
 
+      <Field label="💬 Spar met de AI over deze marinade">
+        {chat.length > 0 && (
+          <View style={styles.chatLog}>
+            {chat.map((msg, i) => (
+              <View key={i} style={[styles.chatBubble, msg.role === 'user' ? styles.chatUser : styles.chatAI]}>
+                <Text style={msg.role === 'user' ? styles.chatUserText : styles.chatAIText}>{msg.text}</Text>
+              </View>
+            ))}
+            {chatBusy && <ActivityIndicator color={theme.colors.accent} style={{ alignSelf: 'flex-start', margin: 6 }} />}
+          </View>
+        )}
+        <View style={styles.aiRow}>
+          <TextInput
+            style={[styles.input, { flex: 1 }]}
+            value={chatInput}
+            onChangeText={setChatInput}
+            placeholder="bijv. ik heb geen sesamolie — wat kan ik gebruiken?"
+            placeholderTextColor={theme.colors.textDim}
+            returnKeyType="send"
+            onSubmitEditing={askChat}
+          />
+          <Pressable style={styles.aiBtn} onPress={askChat} disabled={chatBusy}>
+            {chatBusy ? <ActivityIndicator color="#0d0f12" /> : <Text style={styles.aiBtnText}>Vraag</Text>}
+          </Pressable>
+        </View>
+        <Text style={styles.hint}>Vervangers, verhoudingen, wat erbij past — de AI kent dit recept.</Text>
+      </Field>
+
       <Field label="Cijfer">
         <View style={styles.ratingRow}>
           {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((n) => (
@@ -526,6 +580,12 @@ const styles = StyleSheet.create({
   pickRow: { flexDirection: 'row', gap: 8 },
   enrichBtn: { marginTop: 6, alignSelf: 'flex-start', paddingVertical: 4 },
   enrichText: { color: theme.colors.accent, fontWeight: '600', fontSize: theme.font.small },
+  chatLog: { gap: 6, marginBottom: 6 },
+  chatBubble: { borderRadius: 12, paddingHorizontal: 12, paddingVertical: 8, maxWidth: '90%' },
+  chatUser: { backgroundColor: theme.colors.accent, alignSelf: 'flex-end', borderBottomRightRadius: 4 },
+  chatAI: { backgroundColor: theme.colors.cardAlt, alignSelf: 'flex-start', borderBottomLeftRadius: 4 },
+  chatUserText: { color: '#0d0f12', fontSize: theme.font.small, lineHeight: 19 },
+  chatAIText: { color: theme.colors.text, fontSize: theme.font.small, lineHeight: 19 },
   listHead: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 4 },
   listTitle: { color: theme.colors.text, fontSize: theme.font.h2, fontWeight: '700' },
   addLink: { color: theme.colors.accent, fontSize: theme.font.small, fontWeight: '600' },
