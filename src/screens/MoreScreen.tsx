@@ -13,7 +13,7 @@ type Props = CompositeScreenProps<
 
 type MoreRoute = 'Logbook' | 'MeatEdit' | 'Calibration' | 'Settings';
 const ITEMS: { emoji: string; label: string; sub: string; route: MoreRoute }[] = [
-  { emoji: '📓', label: 'Logboek', sub: 'Al je cooks met foto\'s en notities', route: 'Logbook' },
+  { emoji: '📓', label: 'Logboek', sub: 'Al je grill-sessies met foto\'s en notities', route: 'Logbook' },
   { emoji: '🍖', label: 'Vlees beheren', sub: 'Stukken toevoegen, bewerken of verwijderen', route: 'MeatEdit' },
   { emoji: '🎯', label: 'Kalibratie', sub: 'IJk je meter tegen kokend/ijswater', route: 'Calibration' },
   { emoji: '⚙️', label: 'Instellingen', sub: 'AI-sleutels, thuishub, alarmen en data', route: 'Settings' },

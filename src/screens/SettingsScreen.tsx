@@ -75,7 +75,7 @@ export default function SettingsScreen() {
             <NotifyRow label="🌡️ BBQ buiten bereik" value={notify.ambient} onChange={(v) => setNotify({ ambient: v })} />
             <NotifyRow label="🔥 Tijd om te searen" value={notify.sear} onChange={(v) => setNotify({ sear: v })} />
             <NotifyRow label="🥩 Leg 'm erop (temperen)" value={notify.temper} onChange={(v) => setNotify({ temper: v })} />
-            <NotifyRow label="📌 Vaste 'cook actief'-melding" hint="Stille, aanhoudende melding in je meldingenlijst tijdens een cook." value={notify.status} onChange={(v) => setNotify({ status: v })} />
+            <NotifyRow label="📌 Vaste 'grill actief'-melding" hint="Stille, aanhoudende melding in je meldingenlijst tijdens het grillen." value={notify.status} onChange={(v) => setNotify({ status: v })} />
           </>
         )}
       </Section>
@@ -113,7 +113,7 @@ export default function SettingsScreen() {
         <TextInput style={styles.input} value={haToken} onChangeText={setHaToken} placeholder="eyJ…" placeholderTextColor={theme.colors.textDim} autoCapitalize="none" autoCorrect={false} secureTextEntry />
         <Pressable style={styles.btn} onPress={saveHa}><Text style={styles.btnText}>HA-koppeling opslaan</Text></Pressable>
         <Pressable style={[styles.btn, styles.btnAlt]} onPress={testHa}><Text style={styles.btnAltText}>Test verbinding</Text></Pressable>
-        <Text style={styles.hint}>Token maak je in HA: Profiel → Beveiliging → Langlevende toegangstokens. De sensoren verschijnen pas zodra je een cook start (en 'Vlees ligt erop' tikt).</Text>
+        <Text style={styles.hint}>Token maak je in HA: Profiel → Beveiliging → Langlevende toegangstokens. De sensoren verschijnen pas zodra je een grill-sessie start (en 'Vlees ligt erop' tikt).</Text>
       </Section>
 
       <Section title="Data">

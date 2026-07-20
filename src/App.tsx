@@ -53,9 +53,9 @@ const CookPlaceholder = () => null;
 function CookTabButton({ onPress }: BottomTabBarButtonProps) {
   return (
     <View style={styles.fabWrap} pointerEvents="box-none">
-      <Pressable onPress={onPress} style={styles.fab} accessibilityLabel="Nieuwe cook">
+      <Pressable onPress={onPress} style={styles.fab} accessibilityLabel="Nieuwe grill-sessie">
         <Text style={styles.fabIcon}>🍖</Text>
-        <Text style={styles.fabLabel}>Cook</Text>
+        <Text style={styles.fabLabel}>Grill</Text>
       </Pressable>
     </View>
   );
@@ -124,9 +124,9 @@ export default function App() {
             }}
           >
             <Stack.Screen name="Tabs" component={MainTabs} options={{ headerShown: false }} />
-            <Stack.Screen name="NewCook" component={NewCookScreen} options={{ title: 'Nieuwe cook' }} />
+            <Stack.Screen name="NewCook" component={NewCookScreen} options={{ title: 'Nieuwe grill-sessie' }} />
             <Stack.Screen name="Cook" component={CookScreen} options={{ title: 'Live' }} />
-            <Stack.Screen name="CookDetail" component={CookDetailScreen} options={{ title: 'Cook' }} />
+            <Stack.Screen name="CookDetail" component={CookDetailScreen} options={{ title: 'Grill-sessie' }} />
             <Stack.Screen name="Logbook" component={LogbookScreen} options={{ title: 'Logboek' }} />
             <Stack.Screen name="Calibration" component={CalibrationScreen} options={{ title: 'Kalibratie' }} />
             <Stack.Screen name="Settings" component={SettingsScreen} options={{ title: 'Instellingen' }} />

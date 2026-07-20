@@ -282,7 +282,7 @@ export default function NewCookScreen({ navigation }: Props) {
       )}
 
       <Pressable style={[styles.start, !meatId && styles.startDisabled]} disabled={!meatId} onPress={start}>
-        <Text style={styles.startText}>Start cook 🔥</Text>
+        <Text style={styles.startText}>Start grill-sessie 🔥</Text>
       </Pressable>
     </ScrollView>
   );

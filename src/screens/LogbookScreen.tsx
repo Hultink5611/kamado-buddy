@@ -21,7 +21,7 @@ export default function LogbookScreen({ navigation }: Props) {
   if (cooks.length === 0) {
     return (
       <View style={styles.empty}>
-        <Text style={styles.emptyText}>Nog geen cooks. Start je eerste en 'ie verschijnt hier.</Text>
+        <Text style={styles.emptyText}>Nog geen grill-sessies. Start je eerste en 'ie verschijnt hier.</Text>
       </View>
     );
   }
