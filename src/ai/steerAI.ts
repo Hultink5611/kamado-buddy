@@ -97,11 +97,23 @@ async function callGroq(key: string, prompt: string): Promise<string> {
   return json?.choices?.[0]?.message?.content ?? '';
 }
 
-/** Text advice: try OpenAI, then Gemini, then Groq. Throws if none is set. */
-export async function coachSteer(keys: AIKeys, context: string): Promise<string> {
+/**
+ * Text advice: try OpenAI, then Gemini, then Groq. Throws if none is set.
+ * Pass the user's BBQ profile so the tip matches their actual grill
+ * (kamado holds heat and reacts slowly; a kettle leaks heat and reacts fast).
+ */
+export async function coachSteer(
+  keys: AIKeys,
+  context: string,
+  bbq?: { brand: string; model: string; type: string }
+): Promise<string> {
   const prompt =
-    'Je bent een ervaren kamado-BBQ-coach. Antwoord in het Nederlands, kort en concreet ' +
-    '(max 3 zinnen), met een directe tip. Gebruik geen inleiding.\n\n' +
+    'Je bent een ervaren BBQ-coach. Antwoord in het Nederlands, kort en concreet ' +
+    '(max 3 zinnen), met een directe tip. Gebruik geen inleiding.\n' +
+    (bbq
+      ? `De gebruiker grilt op een ${bbq.brand} ${bbq.model} (${bbq.type}) — stem je advies daarop af.\n`
+      : 'De gebruiker grilt op een kamado.\n') +
+    '\n' +
     context;
   return textChain(keys, prompt);
 }

@@ -28,7 +28,7 @@ import {
 import { pushToHA, pushCookEnded } from '../ha/haPush';
 import type { AIKeys } from '../ai/steerAI';
 import type { HAConfig } from '../ha/haPush';
-import type { ActiveCook, Cook, CookInput, LearnedSetting, Meat, TempSample } from '../logic/types';
+import type { ActiveCook, BBQProfile, Cook, CookInput, LearnedSetting, Meat, TempSample, ThermoProfile } from '../logic/types';
 
 /** Per-type notification switches. All default on (current behaviour). */
 export interface NotifySettings {
@@ -48,6 +48,9 @@ interface Settings {
   keys: AIKeys;
   ha: HAConfig;
   notify: NotifySettings;
+  /** Mijn setup: eigen BBQ + thermometer (optioneel). */
+  bbq?: BBQProfile;
+  thermo?: ThermoProfile;
 }
 
 interface AppValue {
