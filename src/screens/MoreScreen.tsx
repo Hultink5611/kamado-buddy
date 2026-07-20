@@ -4,6 +4,7 @@ import type { CompositeScreenProps } from '@react-navigation/native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 import type { MainTabParamList, RootStackParamList } from '../App';
+import { useApp } from '../state/AppContext';
 import { theme } from '../theme';
 
 type Props = CompositeScreenProps<
@@ -11,15 +12,20 @@ type Props = CompositeScreenProps<
   NativeStackScreenProps<RootStackParamList>
 >;
 
-type MoreRoute = 'Logbook' | 'MeatEdit' | 'Calibration' | 'Settings';
-const ITEMS: { emoji: string; label: string; sub: string; route: MoreRoute }[] = [
-  { emoji: '📓', label: 'Logboek', sub: 'Al je grill-sessies met foto\'s en notities', route: 'Logbook' },
-  { emoji: '🍖', label: 'Vlees beheren', sub: 'Stukken toevoegen, bewerken of verwijderen', route: 'MeatEdit' },
-  { emoji: '🎯', label: 'Kalibratie', sub: 'IJk je meter tegen kokend/ijswater', route: 'Calibration' },
-  { emoji: '⚙️', label: 'Instellingen', sub: 'AI-sleutels, thuishub, alarmen en data', route: 'Settings' },
-];
+type MoreRoute = 'Logbook' | 'MeatEdit' | 'Calibration' | 'Settings' | 'Setup';
 
 export default function MoreScreen({ navigation }: Props) {
+  const { settings } = useApp();
+  const setupSub = settings.bbq
+    ? `${settings.bbq.brand} ${settings.bbq.model}${settings.thermo ? ` · ${settings.thermo.brand} ${settings.thermo.model}` : ''}`
+    : 'Stel je BBQ en thermometer in';
+  const ITEMS: { emoji: string; label: string; sub: string; route: MoreRoute }[] = [
+    { emoji: '🔧', label: 'Mijn setup', sub: setupSub, route: 'Setup' },
+    { emoji: '📓', label: 'Logboek', sub: 'Al je grill-sessies met foto\'s en notities', route: 'Logbook' },
+    { emoji: '🍖', label: 'Vlees beheren', sub: 'Stukken toevoegen, bewerken of verwijderen', route: 'MeatEdit' },
+    { emoji: '🎯', label: 'Kalibratie', sub: 'IJk je meter tegen kokend/ijswater', route: 'Calibration' },
+    { emoji: '⚙️', label: 'Instellingen', sub: 'AI-sleutels, thuishub, alarmen en data', route: 'Settings' },
+  ];
   return (
     <ScrollView contentContainerStyle={styles.content}>
       {ITEMS.map((it) => (

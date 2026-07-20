@@ -122,6 +122,27 @@ export interface Marinade {
   createdAt: number;
 }
 
+export type BBQType = 'kamado' | 'kogel' | 'smoker' | 'anders';
+
+/** The user's own BBQ — picked from the curated catalog or free-form. */
+export interface BBQProfile {
+  brand: string;
+  model: string;
+  type: BBQType;
+  /** Grate diameter in cm (from the catalog), for fit hints later. */
+  gridCm?: number;
+  /** User's own photo — no brand imagery for copyright reasons. */
+  photoUri?: string;
+}
+
+/** The user's thermometer. Registration only; live support is per-protocol. */
+export interface ThermoProfile {
+  brand: string;
+  model: string;
+  /** True when the app can read this device live today (Inkbird iBBQ family). */
+  supported: boolean;
+}
+
 /** A stable vent setting learned for a target temperature band. */
 export interface LearnedSetting {
   bandMaxC: number;

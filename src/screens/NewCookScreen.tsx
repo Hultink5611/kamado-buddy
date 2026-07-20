@@ -166,6 +166,12 @@ export default function NewCookScreen({ navigation }: Props) {
             </View>
           </View>
           <Text style={styles.tips}>{meat.tips}</Text>
+          {settings.bbq && (
+            <Text style={styles.hintSmall}>
+              ⏱️ Voorverwarmen op je {settings.bbq.brand} {settings.bbq.model}:{' '}
+              {settings.bbq.type === 'kamado' ? '~30-45 min (keramiek)' : settings.bbq.type === 'kogel' ? '~15-20 min' : settings.bbq.type === 'smoker' ? '~30-40 min' : '~20-30 min'}
+            </Text>
+          )}
           {meat.story ? (
             <View style={styles.storyBox}>
               <Text style={styles.storyH}>📖 Zo doen de meesten het</Text>

@@ -1,0 +1,115 @@
+{
+  "_meta": {
+    "note": "Gecureerde catalogus van kolen-BBQ's (NL/EU-markt) en kernthermometers. Alleen bestaande, verifieerbare modellen; rooster-diameters (gridCm) zijn fabrieksopgaven, ~ = afgerond. Gas-modellen bewust weggelaten. Geen merkfoto's i.v.m. auteursrecht — gebruikers voegen een eigen foto toe.",
+    "types": { "kamado": "keramiek, houdt warmte lang vast", "kogel": "staal, reageert snel, koelt sneller af", "smoker": "water/bullet smoker, low & slow" }
+  },
+  "bbqs": [
+    {
+      "brand": "Barbecook",
+      "models": [
+        { "model": "Loewy 40", "type": "kogel", "gridCm": 40 },
+        { "model": "Loewy 45", "type": "kogel", "gridCm": 45 },
+        { "model": "Loewy 50", "type": "kogel", "gridCm": 50 },
+        { "model": "Loewy 55", "type": "kogel", "gridCm": 54 }
+      ]
+    },
+    {
+      "brand": "Big Green Egg",
+      "models": [
+        { "model": "Mini", "type": "kamado", "gridCm": 25 },
+        { "model": "MiniMax", "type": "kamado", "gridCm": 33 },
+        { "model": "Small", "type": "kamado", "gridCm": 33 },
+        { "model": "Medium", "type": "kamado", "gridCm": 38 },
+        { "model": "Large", "type": "kamado", "gridCm": 46 },
+        { "model": "XLarge", "type": "kamado", "gridCm": 61 },
+        { "model": "2XL", "type": "kamado", "gridCm": 74 }
+      ]
+    },
+    {
+      "brand": "Grillmeister (Lidl)",
+      "models": [
+        { "model": "Kamado Mini", "type": "kamado", "gridCm": 32 },
+        { "model": "Kamado", "type": "kamado", "gridCm": 47 }
+      ]
+    },
+    {
+      "brand": "Kamado Joe",
+      "models": [
+        { "model": "Joe Jr.", "type": "kamado", "gridCm": 34 },
+        { "model": "Classic I", "type": "kamado", "gridCm": 46 },
+        { "model": "Classic II", "type": "kamado", "gridCm": 46 },
+        { "model": "Classic III", "type": "kamado", "gridCm": 46 },
+        { "model": "Big Joe I", "type": "kamado", "gridCm": 61 },
+        { "model": "Big Joe II", "type": "kamado", "gridCm": 61 },
+        { "model": "Big Joe III", "type": "kamado", "gridCm": 61 },
+        { "model": "Konnected Joe", "type": "kamado", "gridCm": 46 },
+        { "model": "Kettle Joe", "type": "kogel", "gridCm": 56 }
+      ]
+    },
+    {
+      "brand": "Monolith",
+      "models": [
+        { "model": "Junior", "type": "kamado", "gridCm": 33 },
+        { "model": "Classic", "type": "kamado", "gridCm": 46 },
+        { "model": "LeChef", "type": "kamado", "gridCm": 55 }
+      ]
+    },
+    {
+      "brand": "The Bastard",
+      "models": [
+        { "model": "Compact", "type": "kamado", "gridCm": 25 },
+        { "model": "Medium", "type": "kamado", "gridCm": 33 },
+        { "model": "Large", "type": "kamado", "gridCm": 40 },
+        { "model": "XL", "type": "kamado", "gridCm": 46 }
+      ]
+    },
+    {
+      "brand": "Weber",
+      "models": [
+        { "model": "Compact Kettle 47", "type": "kogel", "gridCm": 47 },
+        { "model": "Original Kettle 47", "type": "kogel", "gridCm": 47 },
+        { "model": "Original Kettle 57", "type": "kogel", "gridCm": 57 },
+        { "model": "Master-Touch 57", "type": "kogel", "gridCm": 57 },
+        { "model": "Performer 57", "type": "kogel", "gridCm": 57 },
+        { "model": "Go-Anywhere Charcoal", "type": "kogel" },
+        { "model": "Smokey Mountain Cooker 37", "type": "smoker", "gridCm": 37 },
+        { "model": "Smokey Mountain Cooker 47", "type": "smoker", "gridCm": 47 },
+        { "model": "Smokey Mountain Cooker 57", "type": "smoker", "gridCm": 57 }
+      ]
+    }
+  ],
+  "thermometers": [
+    {
+      "brand": "Inkbird",
+      "models": [
+        { "model": "IBT-2X", "supported": true },
+        { "model": "IBT-4XS", "supported": true },
+        { "model": "IBT-6XS", "supported": true },
+        { "model": "IBBQ-4T", "supported": true }
+      ]
+    },
+    {
+      "brand": "Meater",
+      "models": [
+        { "model": "Original", "supported": false },
+        { "model": "Plus", "supported": false },
+        { "model": "2 Plus", "supported": false },
+        { "model": "Pro", "supported": false }
+      ]
+    },
+    {
+      "brand": "ThermoWorks",
+      "models": [
+        { "model": "Smoke", "supported": false },
+        { "model": "Signals", "supported": false },
+        { "model": "ThermaPen ONE", "supported": false, "note": "handmeter — waarden handmatig invoeren" }
+      ]
+    },
+    {
+      "brand": "Weber",
+      "models": [
+        { "model": "Connect Smart Grilling Hub", "supported": false }
+      ]
+    }
+  ]
+}
