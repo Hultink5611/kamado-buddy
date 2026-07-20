@@ -71,7 +71,7 @@ export default function CookScreen({ navigation }: Props) {
   if (!ac || !meat) {
     return (
       <View style={styles.empty}>
-        <Text style={styles.emptyText}>Geen actieve cook.</Text>
+        <Text style={styles.emptyText}>Geen actieve grill-sessie.</Text>
         <Pressable style={styles.finish} onPress={() => navigation.replace('Tabs')}>
           <Text style={styles.finishText}>Naar start</Text>
         </Pressable>
@@ -157,8 +157,8 @@ export default function CookScreen({ navigation }: Props) {
         </View>
       )}
 
-      <Pressable style={styles.finish} onPress={() => Alert.alert('Cook afronden?', 'Opslaan in logboek en stoppen.', [{ text: 'Annuleer' }, { text: 'Afronden', onPress: finish }])}>
-        <Text style={styles.finishText}>Cook afronden</Text>
+      <Pressable style={styles.finish} onPress={() => Alert.alert('Sessie afronden?', 'Opslaan in logboek en stoppen.', [{ text: 'Annuleer' }, { text: 'Afronden', onPress: finish }])}>
+        <Text style={styles.finishText}>Sessie afronden</Text>
       </Pressable>
     </ScrollView>
   );

@@ -75,7 +75,7 @@ export default function CookDetailScreen({ route, navigation }: Props) {
     ]);
 
   const remove = () =>
-    Alert.alert('Verwijderen?', 'Deze cook uit je logboek verwijderen.', [
+    Alert.alert('Verwijderen?', 'Deze grill-sessie uit je logboek verwijderen.', [
       { text: 'Annuleer' },
       {
         text: 'Verwijder',

@@ -57,7 +57,7 @@ export default function HomeScreen({ navigation }: Props) {
         {activeCook && (
           <Pressable style={styles.cookBanner} onPress={() => navigation.navigate('Cook')}>
             <Text style={styles.cookBannerText}>
-              🔥 Cook actief{(() => { const m = getMeat(activeCook.input.meatId); return m ? ` — ${m.emoji} ${m.name}` : ''; })()}
+              🔥 Grill actief{(() => { const m = getMeat(activeCook.input.meatId); return m ? ` — ${m.emoji} ${m.name}` : ''; })()}
             </Text>
             <Text style={styles.cookBannerSub}>Tik om terug te gaan naar het live-scherm</Text>
           </Pressable>
@@ -106,14 +106,14 @@ export default function HomeScreen({ navigation }: Props) {
 
         <Pressable style={styles.cta} onPress={() => navigation.navigate('NewCook')}>
           <Text style={styles.ctaEmoji}>🔥</Text>
-          <Text style={styles.ctaText}>Nieuwe cook</Text>
+          <Text style={styles.ctaText}>Grillen maar!</Text>
           <Text style={styles.ctaSub}>Kies je vlees en start</Text>
         </Pressable>
 
         {recent.length > 0 && (
           <View style={styles.recentBlock}>
             <View style={styles.recentHead}>
-              <Text style={styles.recentTitle}>📓 Laatste cooks</Text>
+              <Text style={styles.recentTitle}>📓 Laatste grill-sessies</Text>
               <Pressable onPress={() => navigation.navigate('Logbook')}>
                 <Text style={styles.recentLink}>Volledig logboek ›</Text>
               </Pressable>

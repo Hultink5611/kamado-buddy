@@ -42,7 +42,7 @@ export async function setupNotifications(): Promise<boolean> {
       vibrationPattern: [0, 250, 250, 250],
     });
     await Notifications.setNotificationChannelAsync('status', {
-      name: 'Cook status',
+      name: 'Grill status',
       importance: Notifications.AndroidImportance.LOW,
     });
   }
