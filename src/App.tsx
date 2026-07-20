@@ -18,12 +18,14 @@ import CalibrationScreen from './screens/CalibrationScreen';
 import SettingsScreen from './screens/SettingsScreen';
 import MeatEditScreen from './screens/MeatEditScreen';
 import MarinadesScreen from './screens/MarinadesScreen';
+import GuideScreen from './screens/GuideScreen';
 import MoreScreen from './screens/MoreScreen';
 
 export type MainTabParamList = {
   Home: undefined;
   Logbook: undefined;
   CookAction: undefined;
+  Guide: undefined;
   Marinades: undefined;
   More: undefined;
 };
@@ -85,6 +87,7 @@ function MainTabs() {
           },
         })}
       />
+      <Tab.Screen name="Guide" component={GuideScreen} options={{ title: 'Kerntemperaturen', tabBarLabel: 'Gids', tabBarIcon: tabIcon('🌡️') }} />
       <Tab.Screen name="Marinades" component={MarinadesScreen} options={{ title: 'Marinades', tabBarIcon: tabIcon('🧂') }} />
       <Tab.Screen name="More" component={MoreScreen} options={{ title: 'Meer', tabBarIcon: tabIcon('⚙️') }} />
     </Tab.Navigator>

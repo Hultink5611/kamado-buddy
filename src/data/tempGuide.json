@@ -1,0 +1,497 @@
+{
+  "_meta": {
+    "note": "Referentiegids kerntemperaturen. safeC = officieel veilig minimum (USDA/FSIS, °C, incl. rustregel waar van toepassing). practice = gangbare BBQ-praktijk (AmazingRibs finish temps, Weber). Waar praktijk onder het officiële minimum ligt (eend rosé, tonijn rare, zalm 50-54) staat dat expliciet vermeld — eigen keuze/risico.",
+    "sources": [
+      "https://www.fsis.usda.gov/food-safety/safe-food-handling-and-preparation/food-safety-basics/safe-temperature-chart",
+      "https://amazingribs.com/more-technique-and-science/thermometers/finish-temperatures/",
+      "https://www.weber.com/US/en/blog/grilling-inspiration/internal-temperatures"
+    ]
+  },
+  "items": [
+    {
+      "id": "g_steak",
+      "name": "Biefstuk / entrecote / ribeye",
+      "aliases": ["biefstuk", "steak", "entrecote", "ribeye", "cote de boeuf", "tomahawk", "ossenhaas", "tournedos", "rumpsteak"],
+      "category": "Rund",
+      "emoji": "🥩",
+      "headC": "54°",
+      "safeC": 63,
+      "practice": [
+        { "label": "Rare", "c": "49-52" },
+        { "label": "Medium-rare (aanrader)", "c": "54-57" },
+        { "label": "Medium", "c": "58-62" },
+        { "label": "Medium-well", "c": "63-67" },
+        { "label": "Well done", "c": "68+" }
+      ],
+      "method": "Direct en heet (250°C+), 2-3 min per kant, 1-2x keren, daarna 5 min rusten. Dikker dan 4 cm? Reverse sear: indirect op 130°C tot ~6°C onder doel, dan kort hard afschroeien."
+    },
+    {
+      "id": "g_bavette",
+      "name": "Bavette / flanksteak",
+      "aliases": ["bavette", "flanksteak", "flank", "skirt", "roklap", "longhaas", "vinkenlap"],
+      "category": "Rund",
+      "emoji": "🥩",
+      "headC": "54°",
+      "safeC": 63,
+      "practice": [
+        { "label": "Medium-rare (aanrader)", "c": "54-57" },
+        { "label": "Medium (max)", "c": "58-60", "note": "verder = taai" }
+      ],
+      "method": "Heet en kort direct, deksel open, 2-3 min per kant. Goed laten rusten en altijd dun tegen de draad in snijden — anders wordt dit grof gevezelde vlees taai."
+    },
+    {
+      "id": "g_picanha",
+      "name": "Picanha (staartstuk)",
+      "aliases": ["picanha", "staartstuk", "tafelspitz"],
+      "category": "Rund",
+      "emoji": "🥩",
+      "headC": "54°",
+      "safeC": 63,
+      "practice": [
+        { "label": "Medium-rare (aanrader)", "c": "52-55" },
+        { "label": "Medium", "c": "56-60" }
+      ],
+      "method": "Heel: indirect op ~130°C tot ~48°C kern, dan vetkant kort hard afschroeien. In repen aan spiesen (Braziliaans): direct en vaak keren. Vetlaag laten zitten."
+    },
+    {
+      "id": "g_burger",
+      "name": "Hamburger / rundergehakt",
+      "aliases": ["hamburger", "burger", "gehakt", "rundergehakt", "gehaktbal"],
+      "category": "Rund",
+      "emoji": "🍔",
+      "headC": "71°",
+      "safeC": 71,
+      "practice": [
+        { "label": "Veilig gaar (aanrader)", "c": "71", "note": "bij gehakt zitten bacteriën dóór het vlees" }
+      ],
+      "method": "Direct rond 200°C met de deksel dicht, 1-2x keren, niet aandrukken. Gehakt altijd door en door garen — 71°C is hier geen smaakkeuze maar voedselveiligheid (USDA)."
+    },
+    {
+      "id": "g_brisket",
+      "name": "Brisket (runderborst)",
+      "aliases": ["brisket", "runderborst", "borststuk"],
+      "category": "Rund",
+      "emoji": "🐄",
+      "headC": "93°",
+      "safeC": 63,
+      "practice": [
+        { "label": "Boterzacht (aanrader)", "c": "90-96", "note": "prikker glijdt erin als in boter" }
+      ],
+      "method": "Low & slow: indirect op 110°C, 8+ uur, niet keren. Na de stall (~70°C) wikkelen in slagerspapier. Daarna minimaal 1 uur rusten in een koelbox. Gaar is een gevoel (prikker), niet alleen een getal."
+    },
+    {
+      "id": "g_shortribs",
+      "name": "Short ribs (runderribben)",
+      "aliases": ["short ribs", "shortribs", "runderribben", "asado", "jacobsladder"],
+      "category": "Rund",
+      "emoji": "🍖",
+      "headC": "92°",
+      "safeC": 63,
+      "practice": [
+        { "label": "Mals & smeuïg (aanrader)", "c": "90-95" }
+      ],
+      "method": "Indirect op 130-150°C, 4-6 uur afhankelijk van dikte. Net als brisket: klaar als de prikker zonder weerstand door het vlees glijdt en het bindweefsel is gesmolten."
+    },
+    {
+      "id": "g_rosbief",
+      "name": "Rosbief",
+      "aliases": ["rosbief", "roast beef", "runderrollade"],
+      "category": "Rund",
+      "emoji": "🥩",
+      "headC": "54°",
+      "safeC": 63,
+      "practice": [
+        { "label": "Rosé (aanrader)", "c": "52-55", "note": "stijgt nog 3-5° tijdens rust" },
+        { "label": "Medium", "c": "56-60" }
+      ],
+      "method": "Indirect op 130-150°C tot ~5°C onder het doel, dan eventueel kort rondom schroeien. Ruim laten rusten (10-15 min) en dun snijden. Kern stijgt flink na — haal 'm er op tijd af."
+    },
+    {
+      "id": "g_karbonade",
+      "name": "Karbonade / varkenskotelet",
+      "aliases": ["karbonade", "kotelet", "varkenskotelet", "ribkarbonade", "haaskarbonade", "schouderkarbonade"],
+      "category": "Varken",
+      "emoji": "🥓",
+      "headC": "63°",
+      "safeC": 63,
+      "practice": [
+        { "label": "Sappig (aanrader)", "c": "62-65", "note": "+3 min rust" }
+      ],
+      "method": "Direct rond 200°C, om de 3 min keren, ~4-6 min per kant. USDA: 63°C plus 3 minuten rust is veilig — niet doorbakken naar 75°C, dan wordt 'ie gegarandeerd droog."
+    },
+    {
+      "id": "g_varkenshaas",
+      "name": "Varkenshaas",
+      "aliases": ["varkenshaas", "haas", "tenderloin"],
+      "category": "Varken",
+      "emoji": "🐷",
+      "headC": "62°",
+      "safeC": 63,
+      "practice": [
+        { "label": "Licht rosé (aanrader)", "c": "60-63", "note": "+3 min rust" }
+      ],
+      "method": "Direct op matig vuur (180-200°C) rondom bruinen, dan indirect afgaren tot 60-63°C. Mager stuk — elke graad boven 65 kost sap. Kort laten rusten."
+    },
+    {
+      "id": "g_procureur_steak",
+      "name": "Nek-/houthakkersteak (procureur)",
+      "aliases": ["houthakkersteak", "nekkotelet", "procureur steak", "varkensnek", "neksteak"],
+      "category": "Varken",
+      "emoji": "🪓",
+      "headC": "63°",
+      "safeC": 63,
+      "practice": [
+        { "label": "Sappig, licht rosé (aanrader)", "c": "63-65" }
+      ],
+      "method": "Matig direct vuur (180-200°C), deksel dicht, 3-4 min per kant. Meestal gemarineerd: hoog vuur verbrandt de marinade, en druipvet geeft steekvlammen — deflector of grillplaat is veiliger."
+    },
+    {
+      "id": "g_buikspek",
+      "name": "Buikspek / pork belly",
+      "aliases": ["buikspek", "pork belly", "speklap dik"],
+      "category": "Varken",
+      "emoji": "🥓",
+      "headC": "90°",
+      "safeC": 63,
+      "practice": [
+        { "label": "Plakken direct gegrild", "c": "68-72" },
+        { "label": "Heel stuk, smeuïg (aanrader)", "c": "88-92" }
+      ],
+      "method": "Heel stuk: indirect op ~140°C, 2-3 uur per kilo, tot een prikker er zonder weerstand in glijdt. Dunne plakken: direct op matig vuur, vaak keren. Krokant zwoerd vraagt op het eind een korte hete fase."
+    },
+    {
+      "id": "g_pulledpork",
+      "name": "Pulled pork (procureur/schouder)",
+      "aliases": ["pulled pork", "procureur", "varkensschouder", "boston butt"],
+      "category": "Varken",
+      "emoji": "🐖",
+      "headC": "94°",
+      "safeC": 63,
+      "practice": [
+        { "label": "Uit elkaar te trekken (aanrader)", "c": "92-96" }
+      ],
+      "method": "Hét low & slow-werk: indirect op 110-130°C, 8+ uur, niet keren. Reken op een stall rond 70°C (kan uren duren) — wikkelen in folie/papier duwt erdoorheen. Lang rusten, dan pas trekken."
+    },
+    {
+      "id": "g_spareribs",
+      "name": "Spareribs",
+      "aliases": ["spareribs", "ribs", "babyback", "baby back ribs", "st louis ribs"],
+      "category": "Varken",
+      "emoji": "🍖",
+      "headC": "88-94°",
+      "safeC": 63,
+      "practice": [
+        { "label": "Mals, vlees wijkt van bot (aanrader)", "c": "88-94", "note": "bend-test telt zwaarder dan het getal" }
+      ],
+      "method": "Indirect met deflector op ~120°C, botkant onder, niet keren. 3-2-1 (3 u rook, 2 u folie, 1 u aflakken) is de bekendste route. Gaar als het rek doorbuigt en het vlees ~1 cm van het bot terugtrekt."
+    },
+    {
+      "id": "g_worst",
+      "name": "Verse worst / braadworst",
+      "aliases": ["worst", "braadworst", "verse worst", "bratwurst", "chipolata", "saucijs"],
+      "category": "Varken",
+      "emoji": "🌭",
+      "headC": "71°",
+      "safeC": 71,
+      "practice": [
+        { "label": "Gaar (aanrader)", "c": "71", "note": "gehakt: door en door" }
+      ],
+      "method": "Rustig direct op ~180°C en vaak keren zodat het vel niet barst — niet insnijden. Verse worst is gehakt, dus 71°C door en door. Voorgegaarde (gerookte) worst hoeft alleen warm: ~60°C."
+    },
+    {
+      "id": "g_speklap",
+      "name": "Speklappen",
+      "aliases": ["speklap", "speklappen", "buikspeklap"],
+      "category": "Varken",
+      "emoji": "🥓",
+      "headC": "70°+",
+      "safeC": 63,
+      "practice": [
+        { "label": "Doorbakken & uitgebakken (aanrader)", "c": "70-75", "note": "het vet moet renderen" }
+      ],
+      "method": "Laag en geduldig direct (160-180°C), vaak keren. Te heet = zwart vet en rauw binnenin. Het vet moet rustig uitsmelten — dan worden ze krokant én mals."
+    },
+    {
+      "id": "g_kipfilet",
+      "name": "Kipfilet",
+      "aliases": ["kipfilet", "kippenborst", "kip filet", "chicken breast"],
+      "category": "Gevogelte",
+      "emoji": "🍗",
+      "headC": "74°",
+      "safeC": 74,
+      "practice": [
+        { "label": "Veilig gaar (aanrader)", "c": "74", "note": "direct eraf bij 74 = sappigst" }
+      ],
+      "method": "Direct op matig vuur (~190°C), om de 4 min keren; kleurt 'ie te snel, dan indirect afmaken. Gevogelte is altijd 74°C (USDA) — maar er precies bij eraf halen scheelt enorm in sappigheid. Dikke filet vlinderen."
+    },
+    {
+      "id": "g_kipdij",
+      "name": "Kipdijen / drumsticks",
+      "aliases": ["kipdij", "kipdijen", "drumstick", "drumsticks", "kippendij", "poot", "kippenpoot"],
+      "category": "Gevogelte",
+      "emoji": "🍗",
+      "headC": "79°",
+      "safeC": 74,
+      "practice": [
+        { "label": "Veilig", "c": "74" },
+        { "label": "Botermals (aanrader)", "c": "79-85", "note": "bindweefsel smelt pas boven 74" }
+      ],
+      "method": "Direct rond 190°C of indirect op 180°C, regelmatig keren, velkant als laatste krokant. Dijen worden juist béter boven 74°C — het bindweefsel smelt en het vlees wordt mals in plaats van droog."
+    },
+    {
+      "id": "g_vleugels",
+      "name": "Kippenvleugels",
+      "aliases": ["vleugels", "kippenvleugels", "wings", "chicken wings"],
+      "category": "Gevogelte",
+      "emoji": "🍗",
+      "headC": "88°",
+      "safeC": 74,
+      "practice": [
+        { "label": "Veilig", "c": "74" },
+        { "label": "Vet gesmolten, vel knapperig (aanrader)", "c": "85-90" }
+      ],
+      "method": "Indirect op ~200°C, 25-35 min, af en toe keren; laatste minuten direct of aflakken met saus. Vleugels bij 74°C zijn rubberig — 85-90°C maakt ze pas echt lekker."
+    },
+    {
+      "id": "g_helekip",
+      "name": "Hele kip",
+      "aliases": ["hele kip", "kip heel", "beer can chicken", "haantje", "piepkuiken"],
+      "category": "Gevogelte",
+      "emoji": "🐔",
+      "headC": "74°",
+      "safeC": 74,
+      "practice": [
+        { "label": "Borst", "c": "74" },
+        { "label": "Dij (meten in dikste bil)", "c": "80-85" }
+      ],
+      "method": "Indirect met deflector op 180°C, niet keren, ±45 min per kilo. Meet in de dikste bil, niet tegen het bot. Kippenstandaard (beer can) is populair. Vel knapperig? Laatste 10 min de kleppen verder open."
+    },
+    {
+      "id": "g_kalkoen",
+      "name": "Kalkoen(filet)",
+      "aliases": ["kalkoen", "kalkoenfilet", "turkey"],
+      "category": "Gevogelte",
+      "emoji": "🦃",
+      "headC": "74°",
+      "safeC": 74,
+      "practice": [
+        { "label": "Veilig gaar (aanrader)", "c": "74", "note": "pekelen helpt enorm tegen droog" }
+      ],
+      "method": "Indirect op 160-180°C. Kalkoen droogt snel uit: vooraf pekelen (nat of droog) is dé truc. Borst afdekken met folie als 'ie te snel kleurt, en exact bij 74°C eraf."
+    },
+    {
+      "id": "g_eend",
+      "name": "Eendenborst",
+      "aliases": ["eend", "eendenborst", "duck", "eendenfilet"],
+      "category": "Gevogelte",
+      "emoji": "🦆",
+      "headC": "56°",
+      "safeC": 74,
+      "practice": [
+        { "label": "Rosé — gangbare praktijk", "c": "54-57", "note": "⚠️ onder het officiële USDA-minimum van 74° — eigen keuze" },
+        { "label": "Officieel veilig", "c": "74" }
+      ],
+      "method": "Vetkant ruitvormig insnijden, eerst op de (koelere) vetkant renderen, dan kort op de vleeskant. In restaurants gaat eend rosé (54-57°C); officieel geldt voor al het gevogelte 74°C — de keuze is aan jou."
+    },
+    {
+      "id": "g_lamskotelet",
+      "name": "Lamskotelet / lamsrack",
+      "aliases": ["lamskotelet", "lamsrack", "rack of lamb", "lamskoteletjes", "lamsribbetjes"],
+      "category": "Lam",
+      "emoji": "🐑",
+      "headC": "56°",
+      "safeC": 63,
+      "practice": [
+        { "label": "Medium-rare (aanrader)", "c": "54-57" },
+        { "label": "Medium", "c": "58-62" }
+      ],
+      "method": "Heet en snel direct (~230°C), ±2 min per kant. De vetrand eerst even rechtop uitbakken geeft extra smaak. Rack: rondom schroeien en indirect afgaren tot het doel."
+    },
+    {
+      "id": "g_lamsbout",
+      "name": "Lamsbout",
+      "aliases": ["lamsbout", "leg of lamb", "bout"],
+      "category": "Lam",
+      "emoji": "🐑",
+      "headC": "58°",
+      "safeC": 63,
+      "practice": [
+        { "label": "Rosé (aanrader)", "c": "55-60" },
+        { "label": "Medium", "c": "60-65" }
+      ],
+      "method": "Indirect op 150-160°C tot ~5°C onder doel, eventueel kort afschroeien, dan 15 min rusten. Met bot duurt langer maar geeft meer smaak; vlinderen (butterflied) gaart sneller en gelijkmatiger."
+    },
+    {
+      "id": "g_lamsschouder",
+      "name": "Lamsschouder (low & slow)",
+      "aliases": ["lamsschouder", "lamb shoulder", "pulled lamb"],
+      "category": "Lam",
+      "emoji": "🐑",
+      "headC": "90°",
+      "safeC": 63,
+      "practice": [
+        { "label": "Uit elkaar te trekken (aanrader)", "c": "88-93" }
+      ],
+      "method": "Zoals pulled pork: indirect op 120-140°C, 5-7 uur, wikkelen na de stall. Klaar als het bot er zó uit draait. Rijk, vet vlees — ideaal voor pulled lamb wraps."
+    },
+    {
+      "id": "g_hert",
+      "name": "Hertenbiefstuk / wildrug",
+      "aliases": ["hert", "hertenbiefstuk", "wildrug", "ree", "reerug", "venison", "hertenrug"],
+      "category": "Wild",
+      "emoji": "🦌",
+      "headC": "54°",
+      "safeC": 63,
+      "practice": [
+        { "label": "Medium-rare (aanrader)", "c": "52-56", "note": "boven 60° wordt wild snel droog en leverig" }
+      ],
+      "method": "Kort en heet direct schroeien, dan indirect rustig naar 52-56°C. Wild is extreem mager: er is geen vet dat fouten vergeeft, dus meet nauwkeurig en laat goed rusten."
+    },
+    {
+      "id": "g_zwijn",
+      "name": "Wild zwijn",
+      "aliases": ["wild zwijn", "zwijn", "everzwijn", "wildzwijn"],
+      "category": "Wild",
+      "emoji": "🐗",
+      "headC": "68°",
+      "safeC": 63,
+      "practice": [
+        { "label": "Aanrader bij wild", "c": "68-71", "note": "ruimer dan tam varken i.v.m. trichinen bij wild" }
+      ],
+      "method": "Als varken bereiden maar iets ruimer garen: bij wild zwijn is trichinella een reëel risico, dus 68-71°C is de verstandige keuze (officieel USDA-minimum is 63°C voor hele stukken). Low & slow werkt prachtig voor schouder."
+    },
+    {
+      "id": "g_zalm",
+      "name": "Zalmfilet",
+      "aliases": ["zalm", "zalmfilet", "salmon", "zalmmoot"],
+      "category": "Vis",
+      "emoji": "🐟",
+      "headC": "52°",
+      "safeC": 63,
+      "practice": [
+        { "label": "Glazig & sappig (aanrader)", "c": "50-54", "note": "onder USDA-minimum 63° — gangbaar bij verse kwaliteitszalm" },
+        { "label": "Doorbakken (officieel veilig)", "c": "60-63" }
+      ],
+      "method": "Op het vel, koelere kant of indirect rond 180°C, niet keren. Cederhouten plankje is dé kamado-klassieker. Bij 50-54°C is zalm glazig en sappig; officieel veilig is 63°C — jouw keuze, kies verse kwaliteit."
+    },
+    {
+      "id": "g_tonijn",
+      "name": "Tonijnsteak",
+      "aliases": ["tonijn", "tonijnsteak", "tuna"],
+      "category": "Vis",
+      "emoji": "🐟",
+      "headC": "45°",
+      "safeC": 63,
+      "practice": [
+        { "label": "Seared rare (aanrader)", "c": "43-49", "note": "onder USDA-minimum — gangbaar bij sashimi-kwaliteit" },
+        { "label": "Officieel veilig", "c": "63", "note": "dan wel droog en grijs" }
+      ],
+      "method": "Gloeiend heet en extreem kort: 45-60 sec per kant, binnenin rauw-rood. Alleen doen met sashimi-kwaliteit tonijn. Doorgegaarde tonijn (63°C) is veilig maar droog — dan kun je beter blik kopen."
+    },
+    {
+      "id": "g_witvis",
+      "name": "Witvis (kabeljauw/heilbot)",
+      "aliases": ["kabeljauw", "heilbot", "witvis", "koolvis", "schelvis", "wijting"],
+      "category": "Vis",
+      "emoji": "🐟",
+      "headC": "57°",
+      "safeC": 63,
+      "practice": [
+        { "label": "Vlokt net, sappig (aanrader)", "c": "55-60" }
+      ],
+      "method": "Kwetsbaar: indirect of op een plankje/grillmat rond 180°C, niet of hooguit 1x keren. Klaar zodra de vis in stevige vlokken uiteen wil vallen. Werkt ook prachtig in een foliepakketje met boter en citroen."
+    },
+    {
+      "id": "g_helevis",
+      "name": "Hele vis (dorade/zeebaars/forel)",
+      "aliases": ["dorade", "zeebaars", "forel", "hele vis", "makreel"],
+      "category": "Vis",
+      "emoji": "🐠",
+      "headC": "60°",
+      "safeC": 63,
+      "practice": [
+        { "label": "Gaar bij de graat (aanrader)", "c": "58-62", "note": "rugvin laat zó los" }
+      ],
+      "method": "Visklem is dé kamado-truc: direct op ~180°C, deksel dicht, 1x voorzichtig keren. Vel droogdeppen en oliën. Zonder klem: pas keren als het vel vanzelf van het rooster loslaat."
+    },
+    {
+      "id": "g_gamba",
+      "name": "Gamba's / garnalen",
+      "aliases": ["gamba", "gambas", "garnalen", "scampi", "prawns"],
+      "category": "Vis",
+      "emoji": "🦐",
+      "headC": "60°",
+      "safeC": 63,
+      "practice": [
+        { "label": "Net ondoorzichtig (aanrader)", "c": "57-63", "note": "C-vorm = goed, O-vorm = te gaar" }
+      ],
+      "method": "Heel kort en heet: direct op ~220°C, 1-2 min per kant, één keer keren. Aan spiesen of in een mandje. In de schaal blijven ze het sappigst. Kerntemp meten is lastig — de C-vorm en kleur zijn je beste signaal."
+    },
+    {
+      "id": "g_kreeft",
+      "name": "Kreeft / coquilles",
+      "aliases": ["kreeft", "coquille", "coquilles", "sint-jakobsschelp", "lobster"],
+      "category": "Vis",
+      "emoji": "🦞",
+      "headC": "55°",
+      "safeC": 63,
+      "practice": [
+        { "label": "Kreeftenstaart", "c": "57-60" },
+        { "label": "Coquilles (aanrader)", "c": "50-55", "note": "net ondoorzichtig, nog glazig hart" }
+      ],
+      "method": "Kreeft halveren en op de schaal grillen met kruidenboter, ~60°C in de staart. Coquilles gloeiend heet en kort (1-2 min per kant) — daarboven worden ze rubber."
+    },
+    {
+      "id": "g_groente",
+      "name": "Groenten",
+      "aliases": ["groente", "groenten", "paprika", "courgette", "aubergine", "champignon", "portobello", "asperge", "ui"],
+      "category": "Overig",
+      "emoji": "🥕",
+      "headC": "n.v.t.",
+      "safeC": null,
+      "practice": [
+        { "label": "Op kleur en beet", "c": null, "note": "geen kerntemperatuur nodig" }
+      ],
+      "method": "Direct rond 200°C, regelmatig keren, of in een groentemand. Zacht & sappig: foliebakje op de indirecte kant. Rooksmaak & randjes: los op het rooster of aan spiesen. Licht oliën tegen plakken."
+    },
+    {
+      "id": "g_mais",
+      "name": "Maiskolf",
+      "aliases": ["mais", "maiskolf", "corn"],
+      "category": "Overig",
+      "emoji": "🌽",
+      "headC": "n.v.t.",
+      "safeC": null,
+      "practice": [
+        { "label": "Felgeel, hier en daar geblakerd", "c": null }
+      ],
+      "method": "Direct op ~200°C, om de paar minuten een kwartslag, 15-20 min. In de schil stoomt 'ie sappig; los op het rooster pakt 'ie rook en char. Afmaken met kruidenboter en zout."
+    },
+    {
+      "id": "g_halloumi",
+      "name": "Halloumi / grillkaas",
+      "aliases": ["halloumi", "grillkaas", "kaas"],
+      "category": "Overig",
+      "emoji": "🧀",
+      "headC": "n.v.t.",
+      "safeC": null,
+      "practice": [
+        { "label": "Goudbruine strepen", "c": null }
+      ],
+      "method": "Direct op matig vuur, 2-3 min per kant tot goudbruine grillstrepen. Plakken van ±1 cm; dunner smelt door het rooster. Rooster goed schoon en licht geolied, anders plakt het."
+    },
+    {
+      "id": "g_brood",
+      "name": "Brood / flatbread",
+      "aliases": ["brood", "flatbread", "naan", "pizza", "stokbrood"],
+      "category": "Overig",
+      "emoji": "🍞",
+      "headC": "n.v.t.",
+      "safeC": null,
+      "practice": [
+        { "label": "Op kleur", "c": null }
+      ],
+      "method": "Flatbread/naan: direct op het hete rooster, 1-2 min per kant. Pizza: op een pizzasteen, kamado zo heet mogelijk (300°C+) met deflector eronder. Stokbrood: kort direct voor grillstrepen."
+    }
+  ]
+}

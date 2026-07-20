@@ -222,6 +222,33 @@ export async function identifyMeat(
   }
 }
 
+/**
+ * Photo -> just the Dutch cut name (for the temperature guide). Lightweight
+ * variant of identifyMeat: no full meat definition, only the name.
+ */
+export async function identifyCutName(keys: AIKeys, imageBase64: string): Promise<string> {
+  if (!keys.openaiKey && !keys.geminiKey)
+    throw new Error('Fotoherkenning vereist een OpenAI- of Gemini-sleutel');
+  const prompt =
+    'Identificeer het stuk vlees, vis of groente op de foto. Antwoord ALLEEN met de Nederlandse naam ' +
+    'van de snit, zo specifiek mogelijk (bijv. "bavette", "kipdij", "buikspek", "zalmfilet", "paprika"). ' +
+    'Geen andere tekst, geen zin — alleen de naam.';
+  const vision: Array<() => Promise<string>> = [];
+  if (keys.openaiKey) vision.push(() => callOpenAI(keys.openaiKey!, prompt, imageBase64));
+  if (keys.geminiKey) vision.push(() => callGemini(keys.geminiKey!, prompt, imageBase64));
+  let lastErr: unknown;
+  for (const run of vision) {
+    try {
+      const raw = await run();
+      const name = raw.trim().split('\n')[0].replace(/["'.]/g, '').trim();
+      if (name) return name;
+    } catch (e) {
+      lastErr = e;
+    }
+  }
+  throw lastErr instanceof Error ? lastErr : new Error('Fotoherkenning mislukt');
+}
+
 export interface MarinadeSuggestion {
   name: string;
   amount: string;
