@@ -89,6 +89,7 @@ export default function MarinadesScreen() {
   const [filterId, setFilterId] = useState<string | undefined>(undefined);
   const [query, setQuery] = useState('');
   const [busy, setBusy] = useState<null | 'suggest' | 'search' | 'random'>(null);
+  const [expandedId, setExpandedId] = useState<string | null>(null);
 
   const reload = useCallback(() => {
     listMarinades().then(setMarinades);
@@ -100,9 +101,24 @@ export default function MarinadesScreen() {
   const vegCuts = useMemo(() => meats.filter((m) => m.category === 'Groente'), [meats]);
 
   const filterMeat = meats.find((m) => m.id === filterId);
-  const shown = useMemo(
-    () => (filterId ? marinades.filter((m) => m.meatId === filterId) : marinades),
-    [marinades, filterId]
+  // Local filter: cut chip + free-text search over name/cut/ingredients.
+  const shown = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    return marinades.filter((m) => {
+      if (filterId && m.meatId !== filterId) return false;
+      if (!q) return true;
+      return (
+        m.name.toLowerCase().includes(q) ||
+        (m.forMeat ?? '').toLowerCase().includes(q) ||
+        m.ingredients.toLowerCase().includes(q)
+      );
+    });
+  }, [marinades, filterId, query]);
+  // Chips: only cuts that actually have marinades (meat first, then veg).
+  const cutsWithMarinades = useMemo(
+    () =>
+      [...meatCuts, ...vegCuts].filter((mt) => marinades.some((m) => m.meatId === mt.id)),
+    [meatCuts, vegCuts, marinades]
   );
 
   const hasKeys = !!(settings.keys.openaiKey || settings.keys.geminiKey || settings.keys.groqKey);
@@ -208,10 +224,37 @@ export default function MarinadesScreen() {
   }
 
   return (
-    <ScrollView contentContainerStyle={styles.content}>
+    <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
+      <View style={styles.searchRow}>
+        <TextInput
+          style={[styles.searchInput, { flex: 1 }]}
+          value={query}
+          onChangeText={setQuery}
+          placeholder="Zoek — of typ bijv. pittige Surinaamse kip"
+          placeholderTextColor={theme.colors.textDim}
+          autoCorrect={false}
+          returnKeyType="search"
+          onSubmitEditing={searchAI}
+        />
+        <Pressable style={styles.scanBtn} onPress={searchAI} disabled={busy != null}>
+          {busy === 'search' ? <ActivityIndicator color="#0d0f12" /> : <Text style={styles.scanText}>🔍</Text>}
+        </Pressable>
+      </View>
+      <Text style={styles.searchHint}>Typen filtert je eigen marinades · 🔍 laat de AI een nieuw recept zoeken.</Text>
+
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.cats}>
+        <Pressable style={[styles.cat, !filterId && styles.catSel]} onPress={() => setFilterId(undefined)}>
+          <Text style={[styles.catText, !filterId && { color: '#0d0f12' }]}>Alle</Text>
+        </Pressable>
+        {cutsWithMarinades.map((mt) => (
+          <Pressable key={mt.id} style={[styles.cat, filterId === mt.id && styles.catSel]} onPress={() => setFilterId(filterId === mt.id ? undefined : mt.id)}>
+            <Text style={[styles.catText, filterId === mt.id && { color: '#0d0f12' }]}>{mt.emoji} {mt.name}</Text>
+          </Pressable>
+        ))}
+      </ScrollView>
+
       <View style={styles.aiCard}>
-        <Text style={styles.aiH}>✨ Marinades per stuk</Text>
-        <Text style={styles.hint}>Kies een vlees óf een groente. Je ziet dan de opgeslagen marinades ervoor — en laat de AI er nieuwe bij bedenken.</Text>
+        <Text style={styles.aiH}>✨ Nieuwe marinade</Text>
         <View style={styles.pickRow}>
           <View style={{ flex: 1 }}>
             <CutPicker
@@ -242,29 +285,6 @@ export default function MarinadesScreen() {
             {busy === 'random' ? <ActivityIndicator color={theme.colors.text} /> : <Text style={styles.aiBtnAltText}>🎲 Random</Text>}
           </Pressable>
         </View>
-      </View>
-
-      <View style={styles.aiCard}>
-        <Text style={styles.aiH}>🔍 Zoek met AI</Text>
-        <Text style={styles.hint}>Omschrijf wat je zoekt — bijv. “pittige Surinaamse kip” — en de AI vindt het recept.</Text>
-        <View style={styles.aiRow}>
-          <TextInput
-            style={[styles.input, { flex: 1 }]}
-            value={query}
-            onChangeText={setQuery}
-            placeholder="bijv. pittige Surinaamse kip"
-            placeholderTextColor={theme.colors.textDim}
-            returnKeyType="search"
-            onSubmitEditing={searchAI}
-          />
-          <Pressable style={styles.aiBtn} onPress={searchAI} disabled={busy != null}>
-            {busy === 'search' ? <ActivityIndicator color="#0d0f12" /> : <Text style={styles.aiBtnText}>Zoek</Text>}
-          </Pressable>
-        </View>
-      </View>
-
-      <View style={styles.listHead}>
-        <Text style={styles.listTitle}>{filterMeat ? `Marinades voor ${filterMeat.name}` : 'Alle marinades'}</Text>
         <Pressable onPress={() => setDraft({ ...blankMarinade(), meatId: filterId, forMeat: filterMeat?.name })}>
           <Text style={styles.addLink}>+ Zelf toevoegen</Text>
         </Pressable>
@@ -272,20 +292,50 @@ export default function MarinadesScreen() {
 
       {shown.length === 0 ? (
         <Text style={styles.empty}>
-          {filterMeat ? `Nog geen marinades voor ${filterMeat.name}. Laat de AI er een bedenken.` : 'Nog geen marinades. Kies een stuk en laat de AI er een bedenken.'}
+          {query.trim()
+            ? `Niets gevonden voor “${query.trim()}” — tik 🔍 om de AI dit recept te laten zoeken.`
+            : filterMeat
+              ? `Nog geen marinades voor ${filterMeat.name}. Laat de AI er een bedenken.`
+              : 'Nog geen marinades. Kies een stuk en laat de AI er een bedenken.'}
         </Text>
       ) : (
-        shown.map((m) => (
-          <Pressable key={m.id} style={styles.row} onPress={() => setDraft({ ...m })}>
-            {m.photoUri ? <Image source={{ uri: m.photoUri }} style={styles.thumb} /> : <Text style={styles.rowEmoji}>🧂</Text>}
-            <View style={styles.rowMid}>
-              <Text style={styles.rowName}>{m.name || 'Naamloos'}</Text>
-              <Text style={styles.rowSub}>{m.forMeat || 'algemeen'}{m.rating != null ? ` · ${m.rating}/10` : ''}</Text>
-              {m.amount ? <Text style={styles.rowAmount}>🍽️ voor {m.amount}</Text> : null}
-            </View>
-            <Text style={styles.chev}>›</Text>
-          </Pressable>
-        ))
+        shown.map((m) => {
+          const open = expandedId === m.id;
+          return (
+            <Pressable key={m.id} style={styles.card} onPress={() => setExpandedId(open ? null : m.id)}>
+              <View style={styles.cardHead}>
+                {m.photoUri ? <Image source={{ uri: m.photoUri }} style={styles.thumb} /> : <Text style={styles.cardEmoji}>🧂</Text>}
+                <View style={styles.cardMid}>
+                  <Text style={styles.cardName}>{m.name || 'Naamloos'}</Text>
+                  <Text style={styles.cardCat}>{m.forMeat || 'algemeen'}{m.amount ? ` · voor ${m.amount}` : ''}</Text>
+                </View>
+                {m.rating != null && (
+                  <View style={styles.rateBadge}>
+                    <Text style={styles.rateBadgeText}>{m.rating}/10</Text>
+                  </View>
+                )}
+                <Text style={styles.chev}>{open ? '▾' : '›'}</Text>
+              </View>
+
+              {open && (
+                <View style={styles.detail}>
+                  <Text style={styles.detailH}>Ingrediënten</Text>
+                  <Text style={styles.detailText}>{m.ingredients || '—'}</Text>
+                  {m.method ? (
+                    <>
+                      <Text style={styles.detailH}>Methode</Text>
+                      <Text style={styles.detailText}>{m.method}</Text>
+                    </>
+                  ) : null}
+                  {m.note ? <Text style={styles.detailNote}>📝 {m.note}</Text> : null}
+                  <Pressable style={styles.editBtn} onPress={() => setDraft({ ...m })}>
+                    <Text style={styles.editBtnText}>✏️ Bewerken</Text>
+                  </Pressable>
+                </View>
+              )}
+            </Pressable>
+          );
+        })
       )}
     </ScrollView>
   );
@@ -570,6 +620,29 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 
 const styles = StyleSheet.create({
   content: { padding: theme.space(4), gap: theme.space(3) },
+  searchRow: { flexDirection: 'row', gap: 8 },
+  searchInput: { backgroundColor: theme.colors.card, borderRadius: 12, paddingHorizontal: 14, paddingVertical: 12, color: theme.colors.text, fontSize: theme.font.body },
+  searchHint: { color: theme.colors.textDim, fontSize: 11, marginTop: -6 },
+  scanBtn: { backgroundColor: theme.colors.accent, borderRadius: 12, width: 50, alignItems: 'center', justifyContent: 'center' },
+  scanText: { fontSize: 20 },
+  cats: { gap: 8, paddingVertical: 2 },
+  cat: { backgroundColor: theme.colors.card, borderRadius: 20, paddingHorizontal: 14, paddingVertical: 8 },
+  catSel: { backgroundColor: theme.colors.accent },
+  catText: { color: theme.colors.text, fontSize: theme.font.small, fontWeight: '600' },
+  card: { backgroundColor: theme.colors.card, borderRadius: theme.radius, padding: theme.space(3) },
+  cardHead: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  cardEmoji: { fontSize: 24, width: 44, textAlign: 'center' },
+  cardMid: { flex: 1, gap: 1 },
+  cardName: { color: theme.colors.text, fontSize: theme.font.body, fontWeight: '600' },
+  cardCat: { color: theme.colors.textDim, fontSize: 11 },
+  rateBadge: { backgroundColor: theme.colors.cardAlt, borderRadius: 10, paddingHorizontal: 10, paddingVertical: 6 },
+  rateBadgeText: { color: theme.colors.accent, fontWeight: '800', fontSize: theme.font.small },
+  detail: { marginTop: theme.space(3), gap: theme.space(2), borderTopWidth: 1, borderTopColor: theme.colors.line, paddingTop: theme.space(3) },
+  detailH: { color: theme.colors.text, fontSize: theme.font.small, fontWeight: '700' },
+  detailText: { color: theme.colors.textDim, fontSize: theme.font.small, lineHeight: 20 },
+  detailNote: { color: theme.colors.textDim, fontSize: theme.font.small, fontStyle: 'italic' },
+  editBtn: { backgroundColor: theme.colors.accent, borderRadius: 10, paddingVertical: 10, alignItems: 'center', marginTop: 2 },
+  editBtnText: { color: '#0d0f12', fontWeight: '700', fontSize: theme.font.small },
   aiCard: { backgroundColor: theme.colors.card, borderRadius: theme.radius, padding: theme.space(4), gap: theme.space(2) },
   aiH: { color: theme.colors.text, fontSize: theme.font.h2, fontWeight: '700' },
   aiRow: { flexDirection: 'row', gap: 8, alignItems: 'center' },
