@@ -23,9 +23,8 @@ import MoreScreen from './screens/MoreScreen';
 
 export type MainTabParamList = {
   Home: undefined;
-  Logbook: undefined;
-  CookAction: undefined;
   Guide: undefined;
+  CookAction: undefined;
   Marinades: undefined;
   More: undefined;
 };
@@ -35,6 +34,7 @@ export type RootStackParamList = {
   NewCook: undefined;
   Cook: undefined;
   CookDetail: { cookId: string };
+  Logbook: undefined;
   Calibration: undefined;
   Settings: undefined;
   MeatEdit: undefined;
@@ -74,7 +74,7 @@ function MainTabs() {
       }}
     >
       <Tab.Screen name="Home" component={HomeScreen} options={{ title: 'Grillmeister', tabBarLabel: 'Home', tabBarIcon: tabIcon('🔥') }} />
-      <Tab.Screen name="Logbook" component={LogbookScreen} options={{ title: 'Logboek', tabBarIcon: tabIcon('📓') }} />
+      <Tab.Screen name="Guide" component={GuideScreen} options={{ title: 'Kerntemperaturen', tabBarLabel: 'Gids', tabBarIcon: tabIcon('🌡️') }} />
       <Tab.Screen
         name="CookAction"
         component={CookPlaceholder}
@@ -87,7 +87,6 @@ function MainTabs() {
           },
         })}
       />
-      <Tab.Screen name="Guide" component={GuideScreen} options={{ title: 'Kerntemperaturen', tabBarLabel: 'Gids', tabBarIcon: tabIcon('🌡️') }} />
       <Tab.Screen name="Marinades" component={MarinadesScreen} options={{ title: 'Marinades', tabBarIcon: tabIcon('🧂') }} />
       <Tab.Screen name="More" component={MoreScreen} options={{ title: 'Meer', tabBarIcon: tabIcon('⚙️') }} />
     </Tab.Navigator>
@@ -128,6 +127,7 @@ export default function App() {
             <Stack.Screen name="NewCook" component={NewCookScreen} options={{ title: 'Nieuwe cook' }} />
             <Stack.Screen name="Cook" component={CookScreen} options={{ title: 'Live' }} />
             <Stack.Screen name="CookDetail" component={CookDetailScreen} options={{ title: 'Cook' }} />
+            <Stack.Screen name="Logbook" component={LogbookScreen} options={{ title: 'Logboek' }} />
             <Stack.Screen name="Calibration" component={CalibrationScreen} options={{ title: 'Kalibratie' }} />
             <Stack.Screen name="Settings" component={SettingsScreen} options={{ title: 'Instellingen' }} />
             <Stack.Screen name="MeatEdit" component={MeatEditScreen} options={{ title: 'Vlees beheren' }} />
