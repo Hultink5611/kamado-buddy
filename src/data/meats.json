@@ -16,7 +16,7 @@
       "method": "direct",
       "domeTempC": 200,
       "coreTempC": 71,
-      "flipIntervalMin": 3,
+      "flipIntervalMin": 4,
       "estimate": {
         "type": "thickness",
         "baseMin": 5,
@@ -90,7 +90,7 @@
       "method": "direct",
       "domeTempC": 190,
       "coreTempC": 74,
-      "flipIntervalMin": 4,
+      "flipIntervalMin": 5,
       "estimate": {
         "type": "thickness",
         "baseMin": 8,
@@ -100,7 +100,7 @@
       "restMin": 3,
       "tips": "Kip altijd 74°C. Indirect afmaken als de buitenkant te snel kleurt. Dikke filet? Vlinder 'm open voor gelijkmatig garen.",
       "temperMin": 20,
-      "story": "Meestal direct op matig vuur (~190°C) met de deksel dicht, om de 4 min keren. Kleurt de buitenkant te snel, dan schuiven veel mensen 'm naar de indirecte kant (of deflector er half in) om droog worden te voorkomen."
+      "story": "Meestal direct op matig vuur (~190°C) met de deksel dicht, om de ~5 min keren. Kleurt de buitenkant te snel, dan schuiven veel mensen 'm naar de indirecte kant (of deflector er half in) om droog worden te voorkomen."
     },
     {
       "id": "chicken_thigh",
@@ -110,7 +110,7 @@
       "method": "direct",
       "domeTempC": 190,
       "coreTempC": 78,
-      "flipIntervalMin": 4,
+      "flipIntervalMin": 5,
       "estimate": {
         "type": "thickness",
         "baseMin": 10,
@@ -151,7 +151,7 @@
       "method": "direct",
       "domeTempC": 200,
       "coreTempC": 63,
-      "flipIntervalMin": 3,
+      "flipIntervalMin": 4,
       "estimate": {
         "type": "thickness",
         "baseMin": 4,
@@ -161,7 +161,7 @@
       "restMin": 5,
       "tips": "63°C + 3 min rust = sappig en veilig. Niet naar 75°C, dan wordt 'ie droog. Reken ~4-6 min per kant.",
       "temperMin": 30,
-      "story": "Direct zonder deflector rond 200°C, deksel dicht, om de 3 min keren. Dikke karbonades met bot doen velen als mini-reverse-sear: eerst even indirect, dan kort afschroeien."
+      "story": "Direct zonder deflector rond 200°C, deksel dicht, om de ~4 min keren. Dikke karbonades met bot doen velen als mini-reverse-sear: eerst even indirect, dan kort afschroeien."
     },
     {
       "id": "pork_neck_steak",
@@ -171,7 +171,7 @@
       "method": "direct",
       "domeTempC": 180,
       "coreTempC": 63,
-      "flipIntervalMin": 3,
+      "flipIntervalMin": 4,
       "estimate": {
         "type": "thickness",
         "baseMin": 4,
@@ -376,7 +376,7 @@
         "medium-rare": 54,
         "medium": 58
       },
-      "flipIntervalMin": 2,
+      "flipIntervalMin": 3,
       "estimate": {
         "type": "thickness",
         "baseMin": 4,
@@ -437,7 +437,7 @@
       "method": "direct",
       "domeTempC": 200,
       "coreTempC": 74,
-      "flipIntervalMin": 2,
+      "flipIntervalMin": 3,
       "estimate": {
         "type": "thickness",
         "baseMin": 4,
@@ -446,8 +446,8 @@
       "frozenFactor": 1.5,
       "restMin": 2,
       "temperMin": 15,
-      "tips": "Kip altijd 74°C kern; varkensspies mag 63-65°C. Houten stokjes 30 min voorweken tegen verbranden.",
-      "story": "Direct op matig-heet vuur (~200°C) met de deksel meestal open en vaak keren — om de 1-2 min. Zoete marinade (saté/ketjap) verbrandt snel: bij aanbranden even naar de rand of het vuur iets lager."
+      "tips": "Kip altijd 74°C kern; varkensspies mag 63-65°C. Houten stokjes 30 min voorweken. De app seint om de 3 min — sta je erbij, draai dan gerust vaker een kwartslag.",
+      "story": "Direct op matig-heet vuur (~200°C), deksel meestal open, en om de 3 min draaien (een kwartslag per keer). Zoete marinade (saté/ketjap) verbrandt snel: bij aanbranden even naar de rand of het vuur lager."
     },
     {
       "id": "gamba",
