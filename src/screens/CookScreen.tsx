@@ -18,7 +18,8 @@ type Props = NativeStackScreenProps<RootStackParamList, 'Cook'>;
 
 export default function CookScreen({ navigation }: Props) {
   useKeepAwake();
-  const { ink, learned, activeCook, updateActiveCook, finishCook } = useApp();
+  const { ink, learned, activeCook, updateActiveCook, finishCook, settings } = useApp();
+  const simple = settings.simpleMode;
   const ac = activeCook;
 
   const meat = ac ? getMeat(ac.input.meatId) : undefined;
@@ -93,9 +94,9 @@ export default function CookScreen({ navigation }: Props) {
         <TempTile label="🥩 Vlees (kern)" valueC={currentMeat} targetC={targetCoreC} color={theme.colors.meat} />
       </View>
 
-      <LiveChart samples={samples} targetDomeC={targetDomeC} targetCoreC={targetCoreC} />
+      {!simple && <LiveChart samples={samples} targetDomeC={targetDomeC} targetCoreC={targetCoreC} />}
 
-      <VentAdvice advice={advice} />
+      {!simple && <VentAdvice advice={advice} />}
 
       {onGrill ? (
         <Timers
@@ -118,7 +119,13 @@ export default function CookScreen({ navigation }: Props) {
         </View>
       )}
 
-      {ac.input.searFinish && onGrill && (
+      {simple && ac.input.searFinish && onGrill && !searing && (
+        <Pressable style={styles.searBtn} onPress={startSear}>
+          <Text style={styles.searBtnText}>Ik ga dichtschroeien 🔥</Text>
+        </Pressable>
+      )}
+
+      {!simple && ac.input.searFinish && onGrill && (
         searing ? (
           <View style={styles.searBox}>
             <Text style={styles.searH}>🔥 Searen — laatste fase</Text>
@@ -149,7 +156,7 @@ export default function CookScreen({ navigation }: Props) {
         </View>
       )}
 
-      {ink.state === 'connected' && ink.channels.length > 1 && (
+      {!simple && ink.state === 'connected' && ink.channels.length > 1 && (
         <View style={styles.manual}>
           <Text style={styles.manualH}>Kanaal-toewijzing</Text>
           <ChannelPicker label="Omgeving" channels={ink.channels} value={ac.ambientCh} onChange={(n) => updateActiveCook({ ambientCh: n })} />

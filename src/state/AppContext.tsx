@@ -51,6 +51,8 @@ interface Settings {
   /** Mijn setup: eigen BBQ + thermometer (optioneel). */
   bbq?: BBQProfile;
   thermo?: ThermoProfile;
+  /** Eenvoudige modus: live-scherm toont alleen temperaturen + timers. */
+  simpleMode: boolean;
 }
 
 interface AppValue {
@@ -87,6 +89,7 @@ const DEFAULTS: Settings = {
   keys: {},
   ha: {},
   notify: DEFAULT_NOTIFY,
+  simpleMode: false,
 };
 
 const SAMPLE_MS = 5000;

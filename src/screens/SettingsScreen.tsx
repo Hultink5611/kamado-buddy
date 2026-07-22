@@ -52,6 +52,15 @@ export default function SettingsScreen() {
 
   return (
     <ScrollView contentContainerStyle={styles.content}>
+      <Section title="Weergave">
+        <NotifyRow
+          label={settings.simpleMode ? '🎛️ Eenvoudige modus (aan)' : '🎛️ Eenvoudige modus'}
+          hint="Aan = het live-scherm toont alleen de temperaturen en timers, zoals de Inkbird-app. Uit = uitgebreid met grafiek, klepadvies en sear-hulp."
+          value={settings.simpleMode}
+          onChange={(v) => void updateSettings({ simpleMode: v })}
+        />
+      </Section>
+
       <Section title="AI (optioneel)">
         <Text style={styles.hint}>
           Meerdere sleutels? Dan wordt de eerste die werkt gebruikt: OpenAI (GPT) → Gemini → Groq. Zo valt een Gemini-limiet (429) automatisch door naar GPT. De live temp-logica werkt altijd zonder AI.
